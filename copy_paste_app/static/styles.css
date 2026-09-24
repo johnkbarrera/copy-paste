@@ -160,7 +160,7 @@ body:has(.hero-editorial)::before {
   z-index: -2;
   background:
     linear-gradient(180deg, rgba(255, 244, 241, 0.54) 0%, rgba(255, 229, 225, 0.72) 44%, rgba(250, 247, 245, 0.88) 100%),
-    url('/static/images/anime_minimal_hero.jpg?v=3') center 12% / cover no-repeat;
+    url('/static/images/hero-girl-bg.png?v=1') center 12% / cover no-repeat;
 }
 
 body:has(.hero-editorial)::after {
