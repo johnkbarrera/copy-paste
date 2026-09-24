@@ -31,6 +31,12 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 RESERVED_SLUGS = {"api", "login", "logout", "static", "favicon.ico"}
+INVALID_NAME_MESSAGE = "Please use only letters, numbers, spaces, hyphens, or underscores."
+FLASH_COOKIE = "copy_paste_flash"
+FLASH_MESSAGES = {
+    "project_created": ("success", "Project created"),
+    "topic_created": ("success", "Topic created"),
+}
 
 
 def slugify(value: str) -> str:
@@ -67,7 +73,25 @@ def next_available_slug(db: Database, collection_name: str, field_name: str, bas
 
 def render(request: Request, template: str, context: dict, status_code: int = 200) -> HTMLResponse:
     context.setdefault("user", current_user(request))
-    return templates.TemplateResponse(request, template, context, status_code=status_code)
+    flash_key = request.cookies.get(FLASH_COOKIE)
+    if flash_key in FLASH_MESSAGES:
+        kind, message = FLASH_MESSAGES[flash_key]
+        context.setdefault("flash", {"type": kind, "message": message})
+    response = templates.TemplateResponse(request, template, context, status_code=status_code)
+    if flash_key:
+        response.delete_cookie(FLASH_COOKIE)
+    return response
+
+
+def redirect_with_flash(url: str, flash_key: str) -> RedirectResponse:
+    """Redirect and show a toast on the next rendered page."""
+    response = RedirectResponse(url, status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(FLASH_COOKIE, flash_key, max_age=60, httponly=True, samesite="lax")
+    return response
+
+
+def error_flash(message: str) -> dict:
+    return {"type": "error", "message": message}
 
 
 def current_user(request: Request) -> dict | None:
@@ -162,26 +186,35 @@ def create_project(
         return render(
             request,
             "landing.html",
-            {"projects": projects, "error": "Please use only letters, numbers, spaces, hyphens, or underscores."},
+            {"projects": projects, "error": INVALID_NAME_MESSAGE, "flash": error_flash("Project not created")},
             400,
         )
 
     now = utc_now()
-    clean_slug = next_available_slug(db, PROJECTS_COLLECTION, "slug", base_slug)
-    db[PROJECTS_COLLECTION].update_one(
+    try:
+        clean_slug = next_available_slug(db, PROJECTS_COLLECTION, "slug", base_slug)
+        db[PROJECTS_COLLECTION].update_one(
         {"slug": clean_slug},
-        {
-            "$setOnInsert": {
-                "name": clean_project_name,
-                "slug": clean_slug,
-                "topics": [],
-                "created_at": now,
+            {
+                "$setOnInsert": {
+                    "name": clean_project_name,
+                    "slug": clean_slug,
+                    "topics": [],
+                    "created_at": now,
+                },
+                "$set": {"updated_at": now},
             },
-            "$set": {"updated_at": now},
-        },
-        upsert=True,
-    )
-    return RedirectResponse(f"/{clean_slug}", status_code=status.HTTP_303_SEE_OTHER)
+            upsert=True,
+        )
+    except PyMongoError as exc:
+        logger.warning("Could not create project: %s", exc)
+        return render(
+            request,
+            "landing.html",
+            {"projects": [], "db_error": f"Could not connect to MongoDB: {exc}", "flash": error_flash("Project not created: database error")},
+            503,
+        )
+    return redirect_with_flash(f"/{clean_slug}", "project_created")
 
 
 @app.get("/{project_slug}", response_class=HTMLResponse)
@@ -217,41 +250,50 @@ def create_topic(
         return render(
             request,
             "project.html",
-            {"project": project, "topics": topics, "error": "Please use only letters, numbers, spaces, hyphens, or underscores."},
+            {"project": project, "topics": topics, "error": INVALID_NAME_MESSAGE, "flash": error_flash("Topic not created")},
             400,
         )
 
     now = utc_now()
-    clean_slug = next_available_slug(
-        db,
-        TOPICS_COLLECTION,
-        "topic_slug",
-        base_slug,
-        {"project_slug": project_slug},
-    )
-    db[TOPICS_COLLECTION].update_one(
-        {"project_slug": project_slug, "topic_slug": clean_slug},
-        {
-            "$setOnInsert": {
-                "project_slug": project_slug,
-                "topic_slug": clean_slug,
-                "title": clean_title,
-                "content": "",
-                "created_at": now,
+    try:
+        clean_slug = next_available_slug(
+            db,
+            TOPICS_COLLECTION,
+            "topic_slug",
+            base_slug,
+            {"project_slug": project_slug},
+        )
+        db[TOPICS_COLLECTION].update_one(
+            {"project_slug": project_slug, "topic_slug": clean_slug},
+            {
+                "$setOnInsert": {
+                    "project_slug": project_slug,
+                    "topic_slug": clean_slug,
+                    "title": clean_title,
+                    "content": "",
+                    "created_at": now,
+                },
+                "$set": {"updated_at": now},
             },
-            "$set": {"updated_at": now},
-        },
-        upsert=True,
-    )
+            upsert=True,
+        )
 
-    db[PROJECTS_COLLECTION].update_one(
-        {"slug": project_slug},
-        {
-            "$push": {"topics": {"slug": clean_slug, "title": clean_title, "created_at": now, "updated_at": now}},
-            "$set": {"updated_at": now},
-        },
-    )
-    return RedirectResponse(f"/{project_slug}/{clean_slug}", status_code=status.HTTP_303_SEE_OTHER)
+        db[PROJECTS_COLLECTION].update_one(
+            {"slug": project_slug},
+            {
+                "$push": {"topics": {"slug": clean_slug, "title": clean_title, "created_at": now, "updated_at": now}},
+                "$set": {"updated_at": now},
+            },
+        )
+    except PyMongoError as exc:
+        logger.warning("Could not create topic: %s", exc)
+        return render(
+            request,
+            "project.html",
+            {"project": project, "topics": [], "error": "Database error, please try again.", "flash": error_flash("Topic not created: database error")},
+            503,
+        )
+    return redirect_with_flash(f"/{project_slug}/{clean_slug}", "topic_created")
 
 
 @app.get("/{project_slug}/{topic_slug}", response_class=HTMLResponse)
@@ -278,14 +320,18 @@ def save_topic(
     content: Annotated[str, Form()],
 ) -> JSONResponse:
     now = datetime.now(timezone.utc)
-    result = db[TOPICS_COLLECTION].update_one(
-        {"project_slug": project_slug, "topic_slug": topic_slug},
-        {"$set": {"content": content, "updated_at": now}},
-    )
-    if not result.matched_count:
-        raise HTTPException(status_code=404, detail="Topic not found")
-    db[PROJECTS_COLLECTION].update_one(
-        {"slug": project_slug, "topics.slug": topic_slug},
-        {"$set": {"topics.$.updated_at": now, "updated_at": now}},
-    )
+    try:
+        result = db[TOPICS_COLLECTION].update_one(
+            {"project_slug": project_slug, "topic_slug": topic_slug},
+            {"$set": {"content": content, "updated_at": now}},
+        )
+        if not result.matched_count:
+            raise HTTPException(status_code=404, detail="Topic not found")
+        db[PROJECTS_COLLECTION].update_one(
+            {"slug": project_slug, "topics.slug": topic_slug},
+            {"$set": {"topics.$.updated_at": now, "updated_at": now}},
+        )
+    except PyMongoError as exc:
+        logger.warning("Could not save topic: %s", exc)
+        return JSONResponse({"ok": False, "detail": "Database error"}, status_code=503)
     return JSONResponse({"ok": True, "saved_at": now.isoformat()})

@@ -37,8 +37,27 @@
     statsLabel.innerHTML = `<strong>${lines}</strong> line${lines === 1 ? "" : "s"} &bull; <strong>${words}</strong> word${words === 1 ? "" : "s"} &bull; <strong>${chars.toLocaleString()}</strong> char${chars === 1 ? "" : "s"}`;
   }
 
-  async function save() {
-    if (!form || !content || isSaving) return;
+  let pendingManualSave = false;
+  let lastSaveFailed = false;
+
+  function toast(message, type) {
+    if (window.showToast) window.showToast(message, type);
+  }
+
+  function reportFailure(statusMessage, toastMessage, manual) {
+    setStatus("error", statusMessage);
+    // Autosave retries on every pause; only toast once until a save succeeds
+    if (manual || !lastSaveFailed) toast(toastMessage, "error");
+    lastSaveFailed = true;
+  }
+
+  async function save(manual = false) {
+    if (!form || !content) return;
+    if (isSaving) {
+      // A manual save while autosave is in flight runs right after it
+      if (manual) pendingManualSave = true;
+      return;
+    }
     isSaving = true;
     setStatus("saving", "Saving...");
 
@@ -51,12 +70,10 @@
         body: body,
       });
 
-      if (!response.ok) {
-        setStatus("error", "Failed to save");
-        if (window.showToast) {
-          window.showToast("Failed to save changes. Please try again.", "error");
-        }
-        isSaving = false;
+      // An expired session redirects to /login, which fetch follows silently
+      if (!response.ok || response.redirected) {
+        const reason = response.redirected ? "session expired, sign in again" : `server error ${response.status}`;
+        reportFailure("Failed to save", `Changes not saved: ${reason}`, manual);
         return;
       }
 
@@ -67,11 +84,17 @@
         second: "2-digit",
       });
       setStatus("", `Saved at ${savedTime}`);
+      if (manual || lastSaveFailed) toast("Changes saved", "success");
+      lastSaveFailed = false;
     } catch (err) {
       console.error("Auto-save error:", err);
-      setStatus("error", "Connection error");
+      reportFailure("Connection error", "Changes not saved: connection error", manual);
     } finally {
       isSaving = false;
+      if (pendingManualSave) {
+        pendingManualSave = false;
+        save(true);
+      }
     }
   }
 
@@ -107,7 +130,7 @@
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
         clearTimeout(saveTimer);
-        save();
+        save(true);
       }
     });
 
@@ -120,7 +143,7 @@
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       clearTimeout(saveTimer);
-      save();
+      save(true);
     });
   }
 
@@ -144,6 +167,7 @@
         }, 1800);
       } catch (err) {
         console.error("Clipboard copy failed:", err);
+        toast("Could not copy to clipboard", "error");
       }
     });
   }

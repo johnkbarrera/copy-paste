@@ -1175,8 +1175,25 @@ body:has(.hero-editorial) .feature-tag {
   transition: opacity 0.25s, transform 0.25s;
 }
 
+.toast-icon {
+  flex-shrink: 0;
+  color: var(--coral);
+}
+
 .toast.toast-success {
-  border-color: var(--coral);
+  border-color: var(--success);
+}
+
+.toast.toast-success .toast-icon {
+  color: var(--success);
+}
+
+.toast.toast-error {
+  border-color: var(--danger);
+}
+
+.toast.toast-error .toast-icon {
+  color: var(--danger);
 }
 
 @keyframes slideInRight {
