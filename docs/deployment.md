@@ -248,6 +248,132 @@ curl http://127.0.0.1:8085/
 
 ---
 
+## Common Server Issues
+
+### `Is a directory`
+
+If you run the project path directly:
+
+```bash
+/home/ubuntu/open_projects/copy-paste
+```
+
+Bash returns:
+
+```text
+-bash: /home/ubuntu/open_projects/copy-paste: Is a directory
+```
+
+That is normal. You must enter the folder with `cd`:
+
+```bash
+cd /home/ubuntu/open_projects/copy-paste
+```
+
+### Service is restarting with `status=2`
+
+Check the logs first:
+
+```bash
+sudo journalctl -u copy-paste -n 100 --no-pager
+```
+
+Then verify the environment file exists:
+
+```bash
+ls -la utilities
+test -f utilities/copy_paste.env && echo "env exists"
+```
+
+If missing, create it:
+
+```bash
+cp utilities/copy_paste.env.example utilities/copy_paste.env
+nano utilities/copy_paste.env
+```
+
+Restart:
+
+```bash
+sudo systemctl restart copy-paste
+sudo systemctl status copy-paste
+```
+
+### Manual `uvicorn` says port `8085` is already in use
+
+If this command:
+
+```bash
+uv run uvicorn copy_paste_app.main:app --host 127.0.0.1 --port 8085 --env-file utilities/copy_paste.env
+```
+
+returns:
+
+```text
+[Errno 98] error while attempting to bind on address ('127.0.0.1', 8085): address already in use
+```
+
+It usually means the `copy-paste` systemd service is already running and using the port. Check:
+
+```bash
+sudo systemctl status copy-paste
+sudo ss -tlnp | grep 8085
+```
+
+If the service is active, do not run Uvicorn manually at the same time. Test the running service instead:
+
+```bash
+curl -I http://127.0.0.1:8085/
+```
+
+If you need to run manually for debugging, stop the service first:
+
+```bash
+sudo systemctl stop copy-paste
+uv run uvicorn copy_paste_app.main:app --host 127.0.0.1 --port 8085 --env-file utilities/copy_paste.env
+```
+
+When done, press `Ctrl+C` and start the service again:
+
+```bash
+sudo systemctl start copy-paste
+```
+
+### MongoDB DNS error on startup
+
+If logs show:
+
+```text
+MongoDB is not available during startup: The DNS query name does not exist: _mongodb._tcp.cluster...
+```
+
+The app is running, but `MONGO_URI` is not a real MongoDB Atlas URI or still contains a placeholder.
+
+Edit:
+
+```bash
+nano utilities/copy_paste.env
+```
+
+Use the real Atlas URI:
+
+```env
+MONGO_URI=mongodb+srv://USER:PASSWORD@kankunapaq-db.me4ilfe.mongodb.net/
+MONGO_DATABASE=copy_paste
+SECRET_KEY=replace_this_with_a_long_random_secret_key
+```
+
+Then restart:
+
+```bash
+sudo systemctl restart copy-paste
+sudo journalctl -u copy-paste -n 30 --no-pager
+```
+
+If MongoDB Atlas blocks the connection, also check the Atlas Network Access allowlist and add the VPS public IP.
+
+---
+
 ## GitHub Actions Deploy Script
 
 Create `.github/workflows/deploy.yml` if you want automatic deployment on every push to `main`:

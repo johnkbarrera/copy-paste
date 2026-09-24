@@ -102,6 +102,15 @@ If the service is not running, check:
 sudo journalctl -u copy-paste -n 100 --no-pager
 ```
 
+If port `8085` is already in use when running Uvicorn manually, that usually means the `copy-paste` service is already active. Check with:
+
+```bash
+sudo systemctl status copy-paste
+sudo ss -tlnp | grep 8085
+```
+
+Only one process can listen on `127.0.0.1:8085`.
+
 ---
 
 ## Step 4 - Configure Nginx

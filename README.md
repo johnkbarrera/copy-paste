@@ -67,10 +67,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 Clone or copy the project into the server directory:
 
 ```bash
-cd /var/www
-sudo git clone <REPO_URL> copy-paste
-sudo chown -R $USER:$USER /var/www/copy-paste
-cd /var/www/copy-paste
+mkdir -p ~/open_projects
+cd ~/open_projects
+git clone <REPO_URL> copy-paste
+cd ~/open_projects/copy-paste
 uv sync
 ```
 
@@ -104,11 +104,11 @@ After=network.target
 
 [Service]
 Type=simple
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/copy-paste
-Environment=UV_CACHE_DIR=/var/www/copy-paste/.uv-cache
-ExecStart=/usr/local/bin/uv run uvicorn copy_paste_app.main:app --host 127.0.0.1 --port 8085 --env-file utilities/copy_paste.env
+User=ubuntu
+WorkingDirectory=/home/ubuntu/open_projects/copy-paste
+Environment=UV_CACHE_DIR=/home/ubuntu/open_projects/copy-paste/.uv-cache
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/ubuntu/.local/bin/uv run uvicorn copy_paste_app.main:app --host 127.0.0.1 --port 8085 --env-file utilities/copy_paste.env
 Restart=always
 RestartSec=5
 
@@ -116,12 +116,11 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-> **Note**: Verify your `uv` binary location using `which uv` and adjust `ExecStart` if installed in `~/.cargo/bin/uv` or `/root/.cargo/bin/uv`.
+> **Note**: Verify your `uv` binary location using `which uv` and adjust `ExecStart` if installed somewhere else.
 
 Enable and start the service:
 
 ```bash
-sudo chown -R www-data:www-data /var/www/copy-paste
 sudo systemctl daemon-reload
 sudo systemctl enable copy-paste
 sudo systemctl start copy-paste
@@ -200,9 +199,9 @@ sudo certbot renew --dry-run
 ### 6. Updating Deployed Application
 
 ```bash
-cd /var/www/copy-paste
-sudo -u www-data git pull
-sudo -u www-data uv sync
+cd ~/open_projects/copy-paste
+git pull
+uv sync
 sudo systemctl restart copy-paste
 sudo systemctl reload nginx
 ```
@@ -212,7 +211,12 @@ sudo systemctl reload nginx
 ```bash
 sudo systemctl status copy-paste
 sudo journalctl -u copy-paste -n 100
+sudo ss -tlnp | grep 8085
 sudo nginx -t
 curl -I http://127.0.0.1:8085
 curl -I https://copy-paste.kankunapaq.com
 ```
+
+If running Uvicorn manually says port `8085` is already in use, the `copy-paste` service is probably already running. Use `sudo systemctl status copy-paste` and test with `curl -I http://127.0.0.1:8085/`.
+
+If logs show a MongoDB DNS error like `_mongodb._tcp.cluster`, edit `utilities/copy_paste.env` and replace the placeholder `MONGO_URI` with the real MongoDB Atlas URI.
