@@ -428,29 +428,37 @@ main {
 
 .hero-art-side {
   position: relative;
-  min-height: 380px;
-  background-color: #f75555;
+  min-height: 440px;
+  background-color: #faf5f0;
   background-image: url('/static/images/anime_hero_bg.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: center right;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(24px, 4vw, 44px);
+  padding: clamp(28px, 4vw, 48px);
 }
 
 .hero-art-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(20, 20, 24, 0.4) 0%, rgba(255, 82, 82, 0.25) 50%, rgba(20, 20, 24, 0.6) 100%);
+  background: linear-gradient(90deg, rgba(250, 245, 240, 0.94) 0%, rgba(250, 245, 240, 0.72) 48%, rgba(250, 245, 240, 0.15) 100%);
   pointer-events: none;
+}
+
+[data-theme="dark"] .hero-art-side {
+  background-color: #0d0e12;
+}
+
+[data-theme="dark"] .hero-art-overlay {
+  background: linear-gradient(90deg, rgba(13, 14, 18, 0.95) 0%, rgba(13, 14, 18, 0.78) 50%, rgba(13, 14, 18, 0.25) 100%);
 }
 
 .hero-art-content {
   position: relative;
   z-index: 2;
-  color: #ffffff;
-  max-width: 540px;
+  color: var(--text-primary);
+  max-width: 520px;
 }
 
 .hero-pill-badge {
@@ -459,32 +467,31 @@ main {
   gap: 8px;
   padding: 6px 16px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  color: var(--coral);
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
 }
 
 .hero-art-content h2 {
-  font-size: clamp(2rem, 3.6vw, 3.2rem);
+  font-size: clamp(2rem, 3.4vw, 3rem);
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.12;
   letter-spacing: -0.03em;
-  margin: 0 0 16px;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  margin: 0 0 14px;
+  color: var(--text-primary);
 }
 
 .hero-art-content p {
-  font-size: clamp(1rem, 1.2vw, 1.15rem);
-  line-height: 1.6;
+  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+  line-height: 1.65;
   margin: 0 0 24px;
-  opacity: 0.95;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  color: var(--text-secondary);
 }
 
 .hero-feature-tags {
@@ -499,14 +506,14 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: var(--radius-pill);
-  background: rgba(20, 20, 24, 0.65);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 0.8rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.825rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Form Panel on the Right Side of Hero */
