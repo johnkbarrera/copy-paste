@@ -428,9 +428,9 @@ main {
 
 .hero-art-side {
   position: relative;
-  min-height: 440px;
-  background-color: #faf5f0;
-  background-image: url('/static/images/anime_hero_bg.jpg');
+  min-height: 460px;
+  background-color: #f7a07c;
+  background-image: url('/static/images/anime_minimal_hero.jpg?v=2');
   background-size: cover;
   background-position: center right;
   display: flex;
@@ -442,16 +442,16 @@ main {
 .hero-art-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(250, 245, 240, 0.94) 0%, rgba(250, 245, 240, 0.72) 48%, rgba(250, 245, 240, 0.15) 100%);
+  background: linear-gradient(90deg, rgba(254, 238, 231, 0.94) 0%, rgba(254, 238, 231, 0.76) 45%, rgba(254, 238, 231, 0.05) 100%);
   pointer-events: none;
 }
 
 [data-theme="dark"] .hero-art-side {
-  background-color: #0d0e12;
+  background-color: #121319;
 }
 
 [data-theme="dark"] .hero-art-overlay {
-  background: linear-gradient(90deg, rgba(13, 14, 18, 0.95) 0%, rgba(13, 14, 18, 0.78) 50%, rgba(13, 14, 18, 0.25) 100%);
+  background: linear-gradient(90deg, rgba(16, 17, 23, 0.95) 0%, rgba(16, 17, 23, 0.8) 48%, rgba(16, 17, 23, 0.25) 100%);
 }
 
 .hero-art-content {
