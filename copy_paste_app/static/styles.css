@@ -1508,8 +1508,8 @@ body:has(.landing-nav) .content-section {
   margin: clamp(32px, 5vw, 64px) auto;
 }
 
-/* Signed in: no hero, the artwork stays as a faint fixed backdrop */
-body:has(.is-workspace)::before {
+/* Every page except the guest hero keeps the artwork as a faint fixed backdrop */
+body:not(:has(.landing-hero))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -1519,7 +1519,7 @@ body:has(.is-workspace)::before {
   opacity: 0.1;
 }
 
-[data-theme="dark"] body:has(.is-workspace)::before {
+[data-theme="dark"] body:not(:has(.landing-hero))::before {
   opacity: 0.06;
 }
 
