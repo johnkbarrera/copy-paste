@@ -1175,6 +1175,141 @@ body:has(.hero-editorial) .feature-tag {
   transition: opacity 0.25s, transform 0.25s;
 }
 
+/* Destructive / state controls */
+.btn-danger-ghost {
+  color: var(--danger-text);
+}
+
+.btn-danger-ghost:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+[data-theme="dark"] .btn-danger-ghost {
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .btn-danger-ghost:hover {
+  background: rgba(220, 38, 38, 0.14);
+}
+
+.workspace-meta form,
+.editor-actions-top form {
+  margin: 0;
+}
+
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-text);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.workspace-title .status-tag {
+  margin-left: 10px;
+  font-size: 0.85rem;
+}
+
+/* Card with a delete button layered over its corner */
+.card-shell {
+  position: relative;
+}
+
+.card-shell > .card {
+  height: 100%;
+}
+
+.card-delete {
+  position: absolute;
+  right: 54px;
+  top: 22px;
+  margin: 0;
+}
+
+.card-delete button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.card-shell:hover .card-delete button,
+.card-delete button:focus-visible {
+  opacity: 1;
+}
+
+.card-delete button:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+}
+
+@media (hover: none) {
+  .card-delete button {
+    opacity: 1;
+  }
+}
+
+/* Collapsed list of disabled projects on the landing */
+.disabled-projects {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border-medium);
+}
+
+.disabled-projects summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.disabled-projects ul {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.disabled-projects li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.disabled-projects li a {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.disabled-projects li form {
+  margin: 0 0 0 auto;
+}
+
 .toast-icon {
   flex-shrink: 0;
   color: var(--coral);

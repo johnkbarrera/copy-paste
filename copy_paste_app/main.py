@@ -36,6 +36,10 @@ FLASH_COOKIE = "copy_paste_flash"
 FLASH_MESSAGES = {
     "project_created": ("success", "Project created"),
     "topic_created": ("success", "Topic created"),
+    "topic_deleted": ("success", "Topic deleted"),
+    "project_disabled": ("success", "Project disabled"),
+    "project_enabled": ("success", "Project enabled"),
+    "project_is_disabled": ("error", "This project is disabled, enable it to make changes"),
 }
 
 
@@ -94,6 +98,16 @@ def error_flash(message: str) -> dict:
     return {"type": "error", "message": message}
 
 
+def get_project_or_404(db: Database, project_slug: str) -> dict:
+    project = db[PROJECTS_COLLECTION].find_one({"slug": project_slug})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
+
+
+ACTIVE_PROJECTS = {"disabled": {"$ne": True}}
+
+
 def current_user(request: Request) -> dict | None:
     settings = get_settings()
     return read_signed_payload(request.cookies.get("copy_paste_session"), settings.secret_key)
@@ -121,12 +135,18 @@ def startup() -> None:
 @app.get("/", response_class=HTMLResponse)
 def landing(request: Request, db: Annotated[Database, Depends(database)]) -> HTMLResponse:
     try:
-        projects = list(db[PROJECTS_COLLECTION].find({}).sort("updated_at", -1).limit(12))
+        projects = list(db[PROJECTS_COLLECTION].find(ACTIVE_PROJECTS).sort("updated_at", -1).limit(12))
+        disabled_projects = list(db[PROJECTS_COLLECTION].find({"disabled": True}).sort("updated_at", -1))
         db_error = None
     except PyMongoError as exc:
         projects = []
+        disabled_projects = []
         db_error = f"Could not connect to MongoDB: {exc}"
-    return render(request, "landing.html", {"projects": projects, "db_error": db_error})
+    return render(
+        request,
+        "landing.html",
+        {"projects": projects, "disabled_projects": disabled_projects, "db_error": db_error},
+    )
 
 
 @app.get("/favicon.ico", include_in_schema=False)
@@ -182,7 +202,7 @@ def create_project(
     clean_project_name = clean_name(name)
     base_slug = slugify(clean_project_name)
     if not is_valid_name(clean_project_name) or not base_slug or base_slug in RESERVED_SLUGS:
-        projects = list(db[PROJECTS_COLLECTION].find({}).sort("updated_at", -1).limit(12))
+        projects = list(db[PROJECTS_COLLECTION].find(ACTIVE_PROJECTS).sort("updated_at", -1).limit(12))
         return render(
             request,
             "landing.html",
@@ -224,11 +244,38 @@ def project_view(
     db: Annotated[Database, Depends(database)],
     _: Annotated[dict, Depends(require_user)],
 ) -> HTMLResponse:
-    project = db[PROJECTS_COLLECTION].find_one({"slug": project_slug})
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
+    project = get_project_or_404(db, project_slug)
     topics = list(db[TOPICS_COLLECTION].find({"project_slug": project_slug}).sort("updated_at", -1))
     return render(request, "project.html", {"project": project, "topics": topics})
+
+
+def set_project_disabled(db: Database, project_slug: str, disabled: bool) -> RedirectResponse:
+    get_project_or_404(db, project_slug)
+    db[PROJECTS_COLLECTION].update_one(
+        {"slug": project_slug},
+        {"$set": {"disabled": disabled, "updated_at": utc_now()}},
+    )
+    if disabled:
+        return redirect_with_flash("/", "project_disabled")
+    return redirect_with_flash(f"/{project_slug}", "project_enabled")
+
+
+@app.post("/{project_slug}/disable")
+def disable_project(
+    project_slug: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+) -> RedirectResponse:
+    return set_project_disabled(db, project_slug, True)
+
+
+@app.post("/{project_slug}/enable")
+def enable_project(
+    project_slug: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+) -> RedirectResponse:
+    return set_project_disabled(db, project_slug, False)
 
 
 @app.post("/{project_slug}/topics")
@@ -239,9 +286,9 @@ def create_topic(
     _: Annotated[dict, Depends(require_user)],
     title: Annotated[str, Form()],
 ) -> Response:
-    project = db[PROJECTS_COLLECTION].find_one({"slug": project_slug})
-    if not project:
-        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    project = get_project_or_404(db, project_slug)
+    if project.get("disabled"):
+        return redirect_with_flash(f"/{project_slug}", "project_is_disabled")
 
     clean_title = clean_name(title)
     base_slug = slugify(clean_title)
@@ -321,6 +368,9 @@ def save_topic(
 ) -> JSONResponse:
     now = datetime.now(timezone.utc)
     try:
+        project = db[PROJECTS_COLLECTION].find_one({"slug": project_slug}, {"disabled": 1})
+        if project and project.get("disabled"):
+            return JSONResponse({"ok": False, "detail": "Project is disabled"}, status_code=423)
         result = db[TOPICS_COLLECTION].update_one(
             {"project_slug": project_slug, "topic_slug": topic_slug},
             {"$set": {"content": content, "updated_at": now}},
@@ -335,3 +385,24 @@ def save_topic(
         logger.warning("Could not save topic: %s", exc)
         return JSONResponse({"ok": False, "detail": "Database error"}, status_code=503)
     return JSONResponse({"ok": True, "saved_at": now.isoformat()})
+
+
+# Registered after /api/... so "/api/<project>/delete" still reaches save_topic
+@app.post("/{project_slug}/{topic_slug}/delete")
+def delete_topic(
+    project_slug: str,
+    topic_slug: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+) -> RedirectResponse:
+    project = get_project_or_404(db, project_slug)
+    if project.get("disabled"):
+        return redirect_with_flash(f"/{project_slug}", "project_is_disabled")
+    result = db[TOPICS_COLLECTION].delete_one({"project_slug": project_slug, "topic_slug": topic_slug})
+    if not result.deleted_count:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    db[PROJECTS_COLLECTION].update_one(
+        {"slug": project_slug},
+        {"$pull": {"topics": {"slug": topic_slug}}, "$set": {"updated_at": utc_now()}},
+    )
+    return redirect_with_flash(f"/{project_slug}", "topic_deleted")

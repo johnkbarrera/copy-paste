@@ -165,6 +165,23 @@
       {% endfor %}
     </div>
   </div>
+
+  {% if user and disabled_projects %}
+    <details class="disabled-projects">
+      <summary>Disabled projects <span class="counter-badge">{{ disabled_projects | length }}</span></summary>
+      <ul>
+        {% for project in disabled_projects %}
+          <li>
+            <a href="/{{ project.slug }}">{{ project.name }}</a>
+            <span class="slug-pill">/{{ project.slug }}</span>
+            <form action="/{{ project.slug }}/enable" method="post">
+              <button class="btn btn-ghost btn-sm" type="submit">Enable</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
 </section>
 
 <script>

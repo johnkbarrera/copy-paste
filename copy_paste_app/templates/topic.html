@@ -27,6 +27,17 @@
     </div>
 
     <div class="editor-actions-top">
+      {% if project.disabled %}
+        <span class="status-tag">Read-only &middot; project disabled</span>
+      {% else %}
+        <form action="/{{ project.slug }}/{{ topic.topic_slug }}/delete" method="post" data-title="{{ topic.title }}" onsubmit="return confirm('Delete topic &quot;' + this.dataset.title + '&quot;? This cannot be undone.');">
+          <button type="submit" class="btn btn-ghost btn-sm btn-danger-ghost" title="Delete this topic">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+            <span>Delete</span>
+          </button>
+        </form>
+      {% endif %}
+
       <!-- Live Save Status Pill -->
       <div class="status-pill" id="saveStatus">
         <span class="status-dot"></span>
@@ -60,7 +71,7 @@
     </div>
 
     <!-- Textarea -->
-    <textarea id="content" name="content" class="editor-textarea" spellcheck="false" placeholder="Start typing code snippets, documentation, or notes here..." autofocus>{{ topic.content }}</textarea>
+    <textarea id="content" name="content" class="editor-textarea" spellcheck="false" placeholder="Start typing code snippets, documentation, or notes here..."{% if project.disabled %} readonly{% else %} autofocus{% endif %}>{{ topic.content }}</textarea>
 
     <!-- Editor Footer Toolbar -->
     <div class="editor-footer">
@@ -68,7 +79,7 @@
         <span class="kbd">⌘S</span> / <span class="kbd">Ctrl+S</span> to save &bull; <span class="kbd">Tab</span> indents with 2 spaces
       </div>
       <div>
-        <button type="submit" class="btn btn-primary btn-sm">
+        <button type="submit" class="btn btn-primary btn-sm"{% if project.disabled %} disabled{% endif %}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
@@ -81,5 +92,5 @@
   </form>
 </section>
 
-<script src="{{ url_for('static', path='/editor.js') }}?v=2"></script>
+<script src="{{ url_for('static', path='/editor.js') }}?v=3"></script>
 {% endblock %}

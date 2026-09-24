@@ -53,6 +53,10 @@
 
   async function save(manual = false) {
     if (!form || !content) return;
+    if (content.readOnly) {
+      if (manual) toast("This project is disabled, enable it to make changes", "error");
+      return;
+    }
     if (isSaving) {
       // A manual save while autosave is in flight runs right after it
       if (manual) pendingManualSave = true;
@@ -72,7 +76,11 @@
 
       // An expired session redirects to /login, which fetch follows silently
       if (!response.ok || response.redirected) {
-        const reason = response.redirected ? "session expired, sign in again" : `server error ${response.status}`;
+        const reason = response.redirected
+          ? "session expired, sign in again"
+          : response.status === 423
+            ? "project is disabled"
+            : `server error ${response.status}`;
         reportFailure("Failed to save", `Changes not saved: ${reason}`, manual);
         return;
       }
@@ -110,7 +118,7 @@
     // Keyboard Shortcuts: Tab indentation & Cmd/Ctrl + S
     content.addEventListener("keydown", (e) => {
       // Tab key indentation
-      if (e.key === "Tab") {
+      if (e.key === "Tab" && !content.readOnly) {
         e.preventDefault();
         const start = content.selectionStart;
         const end = content.selectionEnd;
