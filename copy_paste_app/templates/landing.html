@@ -1,104 +1,103 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero-editorial" id="top">
-  <div class="landing-kicker">
-    <span>Landing Page</span>
-    <strong>Copy Paste</strong>
-  </div>
-  <div class="hero-showcase">
-    <div class="landing-card-nav">
-      <a class="mini-brand" href="/">
-        <span class="mini-brand-mark">CP</span>
-        <strong>Copy<br>Paste</strong>
+<section class="landing-hero" id="top">
+  <header class="landing-nav">
+    <a class="landing-brand" href="/" aria-label="Copy Paste Home">
+      <span>copy</span>
+      <span>paste<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>
+    </a>
+
+    <nav class="landing-links" aria-label="Landing navigation">
+      <a class="is-active" href="/">Home</a>
+      <a href="#projects">Projects</a>
+      {% if user %}
+        <form action="/logout" method="post">
+          <button type="submit">Sign out</button>
+        </form>
+      {% else %}
+        <a href="/login">Sign in</a>
+      {% endif %}
+    </nav>
+
+    <label class="landing-search">
+      <span class="sr-only">Search projects</span>
+      <input type="search" id="landingSearch" placeholder="Search projects" autocomplete="off">
+    </label>
+
+    <div class="landing-icons">
+      <button type="button" data-theme-proxy aria-label="Toggle dark/light theme" title="Toggle theme">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+      <a href="#projects" aria-label="Projects">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
       </a>
-      <nav class="landing-links" aria-label="Landing navigation">
-        <a href="/">Home</a>
-        <a href="#projects">Projects</a>
-        <a href="/login">Admin</a>
-      </nav>
-      <div class="landing-contact">
-        <span>Local app</span>
-        <strong>Port 8085</strong>
-      </div>
+      {% if user %}
+        <span class="landing-avatar" title="{{ user.username }}">{{ user.username[0] | upper }}</span>
+      {% else %}
+        <a href="/login" aria-label="Sign in">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+        </a>
+      {% endif %}
     </div>
+  </header>
 
-    <div class="landing-hero-grid">
-      <div class="landing-copy">
-        <div class="split-word">
-          <span>I want</span>
-          <span>to</span>
-          <span>organize</span>
+  <div class="landing-stage">
+    <div class="landing-copy">
+      <h1>It&rsquo;s time to<br>save that<br>snippet!</h1>
+      <p>
+        Create project spaces, open focused topics, and keep your code notes saved with instant auto-save on a clean writing canvas.
+      </p>
+
+      {% if db_error %}
+        <div class="alert alert-danger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ db_error }}</span>
         </div>
-        <div class="headline-stack">
-          <h1>Get<br>notes<br>now</h1>
+      {% endif %}
 
-          {% if db_error %}
+      {% if user %}
+        <form class="landing-create-form" action="/projects" method="post">
+          {% if error %}
             <div class="alert alert-danger">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <span>{{ db_error }}</span>
+              <span>{{ error }}</span>
             </div>
           {% endif %}
-
-          {% if user %}
-            <form class="landing-create-form" action="/projects" method="post">
-              {% if error %}
-                <div class="alert alert-danger">
-                  <span>{{ error }}</span>
-                </div>
-              {% endif %}
-              <label for="projectName">Project name</label>
-              <div class="landing-input-row">
-                <input id="projectName" name="name" placeholder="Python Scripts" required autofocus>
-                <button class="btn landing-main-cta" type="submit">Create</button>
-              </div>
-            </form>
-          {% else %}
-            <a class="btn landing-main-cta" href="/login">Get started</a>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="landing-visual" aria-hidden="true">
-        <div class="image-orb">
-          <img src="{{ url_for('static', path='/images/hero-girl-bg.png') }}" alt="">
-        </div>
-        <svg class="float-spark spark-one" viewBox="0 0 24 24"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
-        <svg class="float-spark spark-two" viewBox="0 0 24 24"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
-        <svg class="float-spark spark-three" viewBox="0 0 24 24"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
-      </div>
-    </div>
-
-    <div class="landing-card-foot">
-      <div class="landing-note">
-        <div class="landing-note-row">
-          <svg width="34" height="22" viewBox="0 0 34 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
-            <rect x="1" y="5" width="20" height="16" rx="2"></rect>
-            <path d="M8 5V3a2 2 0 0 1 2-2h21a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-10"></path>
-          </svg>
-          <p>Create project spaces and keep code<br>notes saved with instant auto-save</p>
-        </div>
-        <small>&copy; Copy Paste 2026. All rights reserved.</small>
-      </div>
-      <nav class="landing-social" aria-label="Quick links">
-        <a href="#projects" aria-label="Projects">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        </a>
-        <a href="/login" aria-label="Admin">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 10V7a6 6 0 0 1 12 0v3h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm3 0h6V7a3 3 0 0 0-6 0z"/></svg>
-        </a>
-        <a href="/" aria-label="Home">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 11h3v10h6v-6h4v6h6V11h3z"/></svg>
-        </a>
-        <a href="#top" aria-label="Back to top">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        </a>
-      </nav>
+          <label for="projectName">New project</label>
+          <div class="landing-input-row">
+            <input id="projectName" name="name" placeholder="Python Scripts" required autofocus>
+            <button class="landing-cta" type="submit">Create</button>
+          </div>
+        </form>
+      {% else %}
+        <a class="landing-cta" href="/login">Get started</a>
+      {% endif %}
     </div>
   </div>
+
+  <!-- Line doodles, like the travel sketches in the reference -->
+  <svg class="landing-doodles doodles-left" viewBox="0 0 160 260" aria-hidden="true">
+    <rect x="18" y="20" width="58" height="72" rx="8"></rect>
+    <rect x="34" y="12" width="26" height="14" rx="4"></rect>
+    <path d="M30 46h34M30 60h28M30 74h20"></path>
+    <path d="M104 70l-14 16 14 16M128 70l14 16-14 16M122 64l-12 44"></path>
+    <rect x="22" y="128" width="64" height="44" rx="6"></rect>
+    <path d="M22 142h64M32 135h2M40 135h2M48 135h2"></path>
+    <path d="M36 156l8 6-8 6M52 168h14"></path>
+    <path d="M118 150c10 0 16 8 16 18s-8 22-16 22-16-12-16-22 6-18 16-18zM118 150v-10"></path>
+    <path d="M30 214c16-18 40-18 56 0M42 226c8-8 24-8 32 0M58 238v0"></path>
+    <path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z" transform="translate(120 214) scale(.9)"></path>
+  </svg>
+  <svg class="landing-doodles doodles-right" viewBox="0 0 150 200" aria-hidden="true">
+    <path d="M20 30l30 10-12 8-6 16z"></path>
+    <path d="M86 16h44v56H86zM94 30h28M94 42h28M94 54h16"></path>
+    <path d="M40 110c0-14 12-24 26-24s26 10 26 24c0 20-26 44-26 44S40 130 40 110z"></path>
+    <circle cx="66" cy="110" r="8"></circle>
+    <path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z" transform="translate(112 118) scale(.8)"></path>
+  </svg>
 </section>
 
 <section class="content-section" id="projects">
@@ -165,6 +164,8 @@
   // Real-time project filter
   (function() {
     const searchInput = document.getElementById('projectSearch');
+    const landingSearch = document.getElementById('landingSearch');
+    const themeProxy = document.querySelector('[data-theme-proxy]');
     const projectCards = document.querySelectorAll('.project-card');
     const countBadge = document.getElementById('projectCount');
     
@@ -186,6 +187,24 @@
         
         if (countBadge) countBadge.textContent = visibleCount;
       });
+    }
+
+    if (landingSearch) {
+      landingSearch.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        document.getElementById('projects').scrollIntoView();
+        if (searchInput) searchInput.focus();
+      });
+      landingSearch.addEventListener('input', () => {
+        if (!searchInput) return;
+        searchInput.value = landingSearch.value;
+        searchInput.dispatchEvent(new Event('input'));
+      });
+    }
+
+    if (themeProxy) {
+      themeProxy.addEventListener('click', () => document.getElementById('themeToggle').click());
     }
   })();
 </script>
