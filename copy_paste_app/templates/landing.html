@@ -1,89 +1,133 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero">
-  <div class="hero-copy">
-    <div class="eyebrow-badge">
-      <span class="pulse-dot"></span>
-      Instant Cloud Note Canvas
-    </div>
-    <h1>A modern workspace for your <span class="highlight">code &amp; snippets.</span></h1>
-    <p class="lede">Create projects with clean URLs, organize topical cheat sheets, and jot down ideas with real-time auto-saving.</p>
-    {% if db_error %}
-      <div class="alert alert-danger" style="margin-top: 20px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>{{ db_error }}</span>
-      </div>
-    {% endif %}
+<section class="hero-editorial">
+  <div class="hero-banner-title">
+    <h1 class="hero-heading">
+      Own the <span class="emp">Code</span> &bull; Keep the <span class="emp-outline">Notes</span>
+    </h1>
+    <div class="hero-tagline-jp">Minimalist Canvas &bull; ミニマル</div>
   </div>
 
-  {% if user %}
-    <form class="panel create-form" action="/projects" method="post">
-      <div class="panel-header">
-        <h2>Create Project</h2>
-        <p>Initialize a new workspace with an automatic clean URL slug.</p>
+  <div class="hero-showcase">
+    <!-- Anime Background Visual Side -->
+    <div class="hero-art-side">
+      <div class="hero-art-overlay"></div>
+      
+      <div class="hero-art-content">
+        <div class="hero-pill-badge">
+          <span>⚡ Tokyo Streetwear Aesthetic</span>
+        </div>
+        <h2>Where Art Meets Your Code.</h2>
+        <p>A fast, minimalist Japanese workspace to organize topical cheat sheets, live code notes, and snippet libraries with zero friction.</p>
       </div>
 
-      {% if error %}
-        <div class="alert alert-danger">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      <div class="hero-feature-tags">
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
           </svg>
-          <span>{{ error }}</span>
+          <span>Instant Auto-Save</span>
+        </div>
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>1-Click Clipboard</span>
+        </div>
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>Clean Code Canvas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Fast Action Form -->
+    <div class="hero-panel-side">
+      {% if user %}
+        <form action="/projects" method="post">
+          <div class="panel-header-mini">
+            <div class="kanji-sub">「 新規プロジェクト 」 NEW WORKSPACE</div>
+            <h2>Create Project</h2>
+            <p>Initialize a new workspace with a clean, shareable URL slug.</p>
+          </div>
+
+          {% if error %}
+            <div class="alert alert-danger">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{{ error }}</span>
+            </div>
+          {% endif %}
+
+          <div class="form-group">
+            <label for="projectName">Project Name</label>
+            <div class="input-wrap has-icon">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </span>
+              <input id="projectName" name="name" placeholder="e.g. Tokio API, Dev Setup, Python Scripts" required autofocus>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" type="submit" style="width: 100%;">
+            <span>Create Project</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </form>
+      {% else %}
+        <div>
+          <div class="panel-header-mini">
+            <div class="kanji-sub">「 管理者アクセス 」 ADMIN ACCESS</div>
+            <h2>Admin Workspace</h2>
+            <p>Sign in to initialize projects, manage topical sheets, and edit code snippets.</p>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.925rem; line-height: 1.6;">
+            Default administrative credentials are configured for rapid local workflows and instant onboarding.
+          </p>
+          <a class="btn btn-primary" href="/login" style="width: 100%;">
+            <span>Sign in as Admin</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
         </div>
       {% endif %}
+    </div>
+  </div>
 
-      <div class="form-group">
-        <label for="projectName">Project Name</label>
-        <div class="input-wrap has-icon">
-          <span class="input-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-          </span>
-          <input id="projectName" name="name" placeholder="e.g. Backend API, Dev Notes, Cloud Infra" required autofocus>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" type="submit" style="width: 100%;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        <span>Create Project</span>
-      </button>
-    </form>
-  {% else %}
-    <div class="panel login-callout">
-      <div class="panel-header">
-        <h2>Admin Workspace</h2>
-        <p>Sign in to create, organize, and edit projects and code notes.</p>
-      </div>
-      <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem;">
-        Default administrative credentials are configured for fast local setup and team collaboration.
-      </p>
-      <a class="btn btn-primary" href="/login" style="width: 100%;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-          <polyline points="10 17 15 12 10 7"></polyline>
-          <line x1="15" y1="12" x2="3" y2="12"></line>
-        </svg>
-        <span>Sign in as Admin</span>
-      </a>
+  {% if db_error %}
+    <div class="alert alert-danger" style="margin-top: 24px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>{{ db_error }}</span>
     </div>
   {% endif %}
 </section>
 
 <section class="content-section">
   <div class="section-head">
-    <div class="section-title">
-      <h2>Recent Projects</h2>
-      <span class="counter-badge" id="projectCount">{{ projects | length }}</span>
+    <div class="section-title-wrap">
+      <span class="section-title-jp">「 プロジェクト一覧 」 WORKSPACES</span>
+      <div class="section-title">
+        <h2>Active Projects</h2>
+        <span class="counter-badge" id="projectCount">{{ projects | length }}</span>
+      </div>
     </div>
     {% if projects %}
       <div class="search-box">
@@ -101,11 +145,11 @@
       <a class="card project-card" href="/{{ project.slug }}" data-name="{{ project.name | lower }}" data-slug="{{ project.slug | lower }}">
         <div class="card-top">
           <div class="card-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             </svg>
           </div>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
@@ -116,21 +160,21 @@
         <div class="card-bottom">
           <span class="slug-pill">/{{ project.slug }}</span>
           {% if project.topics is defined and project.topics %}
-            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ project.topics | length }} topics</span>
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">{{ project.topics | length }} topics</span>
           {% endif %}
         </div>
       </a>
     {% else %}
       <div class="empty-state">
         <div class="empty-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             <line x1="12" y1="11" x2="12" y2="17"></line>
             <line x1="9" y1="14" x2="15" y2="14"></line>
           </svg>
         </div>
-        <h3>No projects yet</h3>
-        <p>Create your first project above to start organizing topics, notes, and code snippets.</p>
+        <h3>No projects created yet</h3>
+        <p>Initialize your first project above to begin taking notes and organizing topical cheat sheets.</p>
       </div>
     {% endfor %}
   </div>

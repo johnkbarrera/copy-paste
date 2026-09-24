@@ -44,6 +44,11 @@ http://localhost:8085
 
 ## Production Deployment with Nginx & Systemd
 
+Detailed production manuals are available here:
+
+- [Deployment Guide](docs/deployment.md)
+- [Nginx + HTTPS Setup Guide](docs/nginx-setup.md)
+
 Target domain example:
 ```text
 copy-paste.kankunapaq.com

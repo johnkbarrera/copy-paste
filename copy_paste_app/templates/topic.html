@@ -10,11 +10,14 @@
         <span>/</span>
         <span>{{ topic.title }}</span>
       </nav>
+      <div style="font-size: 0.8rem; font-weight: 800; color: var(--coral); letter-spacing: 0.1em; margin-bottom: 4px;">
+        「 エディター 」 CODE CANVAS
+      </div>
       <h1>{{ topic.title }}</h1>
       <div style="display: flex; align-items: center; gap: 10px;">
         <span class="slug-pill">/{{ project.slug }}/{{ topic.topic_slug }}</span>
         <button class="btn btn-ghost btn-sm" type="button" onclick="navigator.clipboard.writeText(window.location.href); window.showToast('Topic URL copied to clipboard!', 'success');" title="Copy full URL">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
@@ -24,14 +27,14 @@
     </div>
 
     <div class="editor-actions-top">
-      <!-- Live Status Pill -->
+      <!-- Live Save Status Pill -->
       <div class="status-pill" id="saveStatus">
         <span class="status-dot"></span>
         <span class="status-text">Ready</span>
       </div>
 
       <!-- Quick 1-Click Copy All Button -->
-      <button type="button" class="btn btn-ghost btn-sm" id="copyAllBtn" title="Copy all content">
+      <button type="button" class="btn btn-ghost btn-sm" id="copyAllBtn" title="Copy all content to clipboard">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -45,11 +48,11 @@
     <!-- Editor Header Toolbar -->
     <div class="editor-toolbar">
       <div class="toolbar-left">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--coral);">
           <polyline points="16 18 22 12 16 6"></polyline>
           <polyline points="8 6 2 12 8 18"></polyline>
         </svg>
-        <span style="font-weight: 600; color: var(--text-primary);">Editor Canvas</span>
+        <span style="font-weight: 700; color: #ffffff;">Live Markdown &amp; Code Canvas</span>
       </div>
       <div class="toolbar-right">
         <span id="editorStats" class="stats-counter">0 lines &bull; 0 words &bull; 0 chars</span>
@@ -57,14 +60,14 @@
     </div>
 
     <!-- Textarea -->
-    <textarea id="content" name="content" class="editor-textarea" spellcheck="false" placeholder="Start typing your notes, markdown, or code here..." autofocus>{{ topic.content }}</textarea>
+    <textarea id="content" name="content" class="editor-textarea" spellcheck="false" placeholder="Start typing code snippets, documentation, or notes here..." autofocus>{{ topic.content }}</textarea>
 
     <!-- Editor Footer Toolbar -->
     <div class="editor-footer">
       <div class="shortcut-hint">
         <span class="kbd">⌘S</span> / <span class="kbd">Ctrl+S</span> to save &bull; <span class="kbd">Tab</span> indents with 2 spaces
       </div>
-      <div style="display: flex; gap: 10px;">
+      <div>
         <button type="submit" class="btn btn-primary btn-sm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>

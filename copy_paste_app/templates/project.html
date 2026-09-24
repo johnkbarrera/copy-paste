@@ -7,6 +7,9 @@
       <span>/</span>
       <span>{{ project.name }}</span>
     </nav>
+    <div style="font-size: 0.8rem; font-weight: 800; color: var(--coral); letter-spacing: 0.1em; margin-bottom: 6px;">
+      「 プロジェクト 」 WORKSPACE
+    </div>
     <h1 class="workspace-title">{{ project.name }}</h1>
     <div class="workspace-meta">
       <span class="slug-pill">/{{ project.slug }}</span>
@@ -20,10 +23,11 @@
     </div>
   </div>
 
-  <form class="panel create-form" action="/{{ project.slug }}/topics" method="post">
-    <div class="panel-header">
-      <h2>Create New Topic</h2>
-      <p>Add an editable code sheet or topical note.</p>
+  <form class="panel-card" action="/{{ project.slug }}/topics" method="post">
+    <div class="panel-header-mini">
+      <div class="kanji-sub">「 新規トピック 」 NEW NOTE SHEET</div>
+      <h2>Create Topic</h2>
+      <p>Add an editable code sheet or topical note to this workspace.</p>
     </div>
 
     {% if error %}
@@ -54,20 +58,23 @@
     </div>
 
     <button class="btn btn-primary" type="submit" style="width: 100%;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
       <span>Create Topic</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
     </button>
   </form>
 </section>
 
 <section class="content-section">
   <div class="section-head">
-    <div class="section-title">
-      <h2>Topics &amp; Notes</h2>
-      <span class="counter-badge" id="topicCount">{{ topics | length }}</span>
+    <div class="section-title-wrap">
+      <span class="section-title-jp">「 トピック一覧 」 TOPICAL SHEETS</span>
+      <div class="section-title">
+        <h2>Topics &amp; Notes</h2>
+        <span class="counter-badge" id="topicCount">{{ topics | length }}</span>
+      </div>
     </div>
     {% if topics %}
       <div class="search-box">
@@ -84,13 +91,13 @@
     {% for topic in topics %}
       <a class="card topic-card" href="/{{ project.slug }}/{{ topic.topic_slug }}" data-title="{{ topic.title | lower }}" data-slug="{{ topic.topic_slug | lower }}">
         <div class="card-top">
-          <div class="card-icon" style="background: rgba(6, 182, 212, 0.1); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.25);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="16 18 22 12 16 6"></polyline>
               <polyline points="8 6 2 12 8 18"></polyline>
             </svg>
           </div>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
           </svg>
@@ -101,14 +108,14 @@
         <div class="card-bottom">
           <span class="slug-pill">/{{ topic.topic_slug }}</span>
           {% if topic.updated_at %}
-            <span style="font-size: 0.775rem; color: var(--text-muted);">Updated recently</span>
+            <span style="font-size: 0.775rem; font-weight: 600; color: var(--text-muted);">Updated</span>
           {% endif %}
         </div>
       </a>
     {% else %}
       <div class="empty-state">
         <div class="empty-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="12" y1="18" x2="12" y2="12"></line>
@@ -116,7 +123,7 @@
           </svg>
         </div>
         <h3>No topics yet</h3>
-        <p>Create the first topic above to start writing documentation, code snippets, or markdown notes.</p>
+        <p>Create the first topic above to start writing code notes, documentation, or cheat sheets.</p>
       </div>
     {% endfor %}
   </div>
