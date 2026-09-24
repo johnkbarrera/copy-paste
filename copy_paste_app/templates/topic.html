@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="editor-shell">
+  <div class="editor-head">
+    <div class="editor-meta">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Projects</a>
+        <span>/</span>
+        <a href="/{{ project.slug }}">{{ project.name }}</a>
+        <span>/</span>
+        <span>{{ topic.title }}</span>
+      </nav>
+      <h1>{{ topic.title }}</h1>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="slug-pill">/{{ project.slug }}/{{ topic.topic_slug }}</span>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="navigator.clipboard.writeText(window.location.href); window.showToast('Topic URL copied to clipboard!', 'success');" title="Copy full URL">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Share</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="editor-actions-top">
+      <!-- Live Status Pill -->
+      <div class="status-pill" id="saveStatus">
+        <span class="status-dot"></span>
+        <span class="status-text">Ready</span>
+      </div>
+
+      <!-- Quick 1-Click Copy All Button -->
+      <button type="button" class="btn btn-ghost btn-sm" id="copyAllBtn" title="Copy all content">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span>Copy All</span>
+      </button>
+    </div>
+  </div>
+
+  <form id="editorForm" class="editor-container" data-save-url="/api/{{ project.slug }}/{{ topic.topic_slug }}">
+    <!-- Editor Header Toolbar -->
+    <div class="editor-toolbar">
+      <div class="toolbar-left">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span style="font-weight: 600; color: var(--text-primary);">Editor Canvas</span>
+      </div>
+      <div class="toolbar-right">
+        <span id="editorStats" class="stats-counter">0 lines &bull; 0 words &bull; 0 chars</span>
+      </div>
+    </div>
+
+    <!-- Textarea -->
+    <textarea id="content" name="content" class="editor-textarea" spellcheck="false" placeholder="Start typing your notes, markdown, or code here..." autofocus>{{ topic.content }}</textarea>
+
+    <!-- Editor Footer Toolbar -->
+    <div class="editor-footer">
+      <div class="shortcut-hint">
+        <span class="kbd">⌘S</span> / <span class="kbd">Ctrl+S</span> to save &bull; <span class="kbd">Tab</span> indents with 2 spaces
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<script src="{{ url_for('static', path='/editor.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="workspace-head">
+  <div>
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="/">Projects</a>
+      <span>/</span>
+      <span>{{ project.name }}</span>
+    </nav>
+    <h1 class="workspace-title">{{ project.name }}</h1>
+    <div class="workspace-meta">
+      <span class="slug-pill">/{{ project.slug }}</span>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="navigator.clipboard.writeText(window.location.origin + '/{{ project.slug }}'); window.showToast('Project URL copied to clipboard!', 'success');" title="Copy project URL">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span>Copy URL</span>
+      </button>
+    </div>
+  </div>
+
+  <form class="panel create-form" action="/{{ project.slug }}/topics" method="post">
+    <div class="panel-header">
+      <h2>Create New Topic</h2>
+      <p>Add an editable code sheet or topical note.</p>
+    </div>
+
+    {% if error %}
+      <div class="alert alert-danger">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ error }}</span>
+      </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="topicTitle">Topic Title</label>
+      <div class="input-wrap has-icon">
+        <span class="input-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </span>
+        <input id="topicTitle" name="title" placeholder="e.g. Docker Setup, Auth Flow, API Reference" required autofocus>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit" style="width: 100%;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Create Topic</span>
+    </button>
+  </form>
+</section>
+
+<section class="content-section">
+  <div class="section-head">
+    <div class="section-title">
+      <h2>Topics &amp; Notes</h2>
+      <span class="counter-badge" id="topicCount">{{ topics | length }}</span>
+    </div>
+    {% if topics %}
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="topicSearch" placeholder="Filter topics..." autocomplete="off">
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="grid" id="topicGrid">
+    {% for topic in topics %}
+      <a class="card topic-card" href="/{{ project.slug }}/{{ topic.topic_slug }}" data-title="{{ topic.title | lower }}" data-slug="{{ topic.topic_slug | lower }}">
+        <div class="card-top">
+          <div class="card-icon" style="background: rgba(6, 182, 212, 0.1); color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.25);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+          </div>
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h3 class="card-title">{{ topic.title }}</h3>
+        </div>
+        <div class="card-bottom">
+          <span class="slug-pill">/{{ topic.topic_slug }}</span>
+          {% if topic.updated_at %}
+            <span style="font-size: 0.775rem; color: var(--text-muted);">Updated recently</span>
+          {% endif %}
+        </div>
+      </a>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <h3>No topics yet</h3>
+        <p>Create the first topic above to start writing documentation, code snippets, or markdown notes.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+  // Real-time topic filter
+  (function() {
+    const searchInput = document.getElementById('topicSearch');
+    const topicCards = document.querySelectorAll('.topic-card');
+    const countBadge = document.getElementById('topicCount');
+    
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        topicCards.forEach(card => {
+          const title = card.getAttribute('data-title') || '';
+          const slug = card.getAttribute('data-slug') || '';
+          if (title.includes(query) || slug.includes(query)) {
+            card.style.display = '';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+        
+        if (countBadge) countBadge.textContent = visibleCount;
+      });
+    }
+  })();
+</script>
+{% endblock %}

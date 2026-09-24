@@ -1,0 +1,1 @@
+"""Copy Paste web app."""

@@ -1,0 +1,13 @@
+.venv/
+.uv-cache/
+__pycache__/
+*.py[cod]
+
+# Variables locales
+utilities/*.env
+!utilities/*.env.example
+
+# Archivos locales de sistema/editor
+.DS_Store
+.idea/
+.vscode/
