@@ -147,6 +147,35 @@ body {
   flex-direction: column;
 }
 
+body:has(.hero-editorial) {
+  background-color: #f7b09a;
+  background-image: none;
+  position: relative;
+}
+
+body:has(.hero-editorial)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(180deg, rgba(255, 244, 241, 0.54) 0%, rgba(255, 229, 225, 0.72) 44%, rgba(250, 247, 245, 0.88) 100%),
+    url('/static/images/anime_minimal_hero.jpg?v=3') center 12% / cover no-repeat;
+}
+
+body:has(.hero-editorial)::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.48), transparent 28%),
+    radial-gradient(circle at 80% 18%, rgba(255, 82, 82, 0.18), transparent 24%),
+    linear-gradient(90deg, rgba(250, 247, 245, 0.52), rgba(250, 247, 245, 0.18), rgba(250, 247, 245, 0.58));
+  backdrop-filter: blur(2px);
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -171,6 +200,15 @@ a {
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
   transition: all var(--transition-normal);
+}
+
+body:has(.hero-editorial) .topbar {
+  background: rgba(255, 255, 255, 0.66);
+  border-bottom-color: rgba(255, 255, 255, 0.38);
+}
+
+[data-theme="dark"] body:has(.hero-editorial) .topbar {
+  background: rgba(13, 14, 18, 0.72);
 }
 
 .brand {
@@ -369,6 +407,11 @@ main {
   margin: 0 auto;
 }
 
+body:has(.hero-editorial) main {
+  max-width: 1380px;
+  padding-top: clamp(28px, 5vw, 72px);
+}
+
 /* ==========================================================================
    Japanese Streetwear Hero Showcase
    ========================================================================== */
@@ -418,21 +461,23 @@ main {
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-subtle);
+  box-shadow: 0 28px 70px -18px rgba(20, 20, 23, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.58);
   min-height: 480px;
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(340px, 440px);
   align-items: stretch;
+  background: rgba(255, 255, 255, 0.56);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .hero-art-side {
   position: relative;
   min-height: 460px;
-  background-color: #f7a07c;
-  background-image: url('/static/images/anime_minimal_hero.jpg?v=2');
-  background-size: cover;
-  background-position: center right;
+  background:
+    linear-gradient(135deg, rgba(255, 82, 82, 0.9), rgba(255, 117, 117, 0.72)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -442,7 +487,9 @@ main {
 .hero-art-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(254, 238, 231, 0.94) 0%, rgba(254, 238, 231, 0.76) 45%, rgba(254, 238, 231, 0.05) 100%);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.42) 52%, rgba(255, 255, 255, 0.1) 100%),
+    repeating-linear-gradient(0deg, transparent 0 42px, rgba(255, 255, 255, 0.14) 42px 54px);
   pointer-events: none;
 }
 
@@ -518,12 +565,14 @@ main {
 
 /* Form Panel on the Right Side of Hero */
 .hero-panel-side {
-  background: var(--bg-surface);
+  background: rgba(255, 255, 255, 0.8);
   padding: clamp(28px, 4vw, 44px);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-left: 1px solid var(--border-subtle);
+  border-left: 1px solid rgba(255, 255, 255, 0.44);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .panel-header-mini {
@@ -660,6 +709,16 @@ textarea::placeholder {
   margin-bottom: 28px;
 }
 
+body:has(.hero-editorial) .content-section {
+  border-radius: var(--radius-xl);
+  padding: clamp(22px, 3vw, 34px);
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 22px 62px -28px rgba(20, 20, 23, 0.24);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
 .section-title-wrap {
   display: flex;
   flex-direction: column;
@@ -748,6 +807,16 @@ textarea::placeholder {
   position: relative;
   text-decoration: none;
   min-height: 155px;
+}
+
+body:has(.hero-editorial) .card,
+body:has(.hero-editorial) .search-box input,
+body:has(.hero-editorial) .hero-pill-badge,
+body:has(.hero-editorial) .feature-tag {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .card:hover {
@@ -1172,6 +1241,13 @@ textarea::placeholder {
   gap: 16px;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+body:has(.hero-editorial) .app-footer {
+  background: rgba(255, 255, 255, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 /* ==========================================================================
