@@ -1491,7 +1491,22 @@ body:has(.landing-nav) .content-section {
   margin: clamp(32px, 5vw, 64px) auto;
 }
 
-/* Signed in: no hero, projects first with a discreet create panel on the side */
+/* Signed in: no hero, the artwork stays as a faint fixed backdrop */
+body:has(.is-workspace)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('/static/images/hero-girl-bg.png?v=3') 68% 30% / cover no-repeat;
+  opacity: 0.1;
+}
+
+[data-theme="dark"] body:has(.is-workspace)::before {
+  opacity: 0.06;
+}
+
+/* Signed in: projects first with a discreet create panel on the side */
 .is-workspace .workspace-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
