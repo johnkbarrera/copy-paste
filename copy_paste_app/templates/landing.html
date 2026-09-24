@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero-editorial">
+<section class="hero-editorial" id="top">
   <div class="landing-kicker">
     <span>Landing Page</span>
     <strong>Copy Paste</strong>
@@ -26,50 +26,77 @@
       <div class="landing-copy">
         <div class="split-word">
           <span>I want</span>
-          <span>to organize</span>
+          <span>to</span>
+          <span>organize</span>
         </div>
-        <h1>Get notes now</h1>
-        <p>
-          Create project spaces, open focused topics, and keep code notes saved in MongoDB with a clean writing canvas.
-        </p>
+        <div class="headline-stack">
+          <h1>Get<br>notes<br>now</h1>
 
-        {% if db_error %}
-          <div class="alert alert-danger">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>{{ db_error }}</span>
-          </div>
-        {% endif %}
-
-        {% if user %}
-          <form class="landing-create-form" action="/projects" method="post">
-            {% if error %}
-              <div class="alert alert-danger">
-                <span>{{ error }}</span>
-              </div>
-            {% endif %}
-            <label for="projectName">Project name</label>
-            <div class="landing-input-row">
-              <input id="projectName" name="name" placeholder="Python Scripts" required autofocus>
-              <button class="btn btn-sumi" type="submit">Create</button>
+          {% if db_error %}
+            <div class="alert alert-danger">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>{{ db_error }}</span>
             </div>
-          </form>
-        {% else %}
-          <a class="btn btn-sumi landing-main-cta" href="/login">Get started</a>
-        {% endif %}
+          {% endif %}
+
+          {% if user %}
+            <form class="landing-create-form" action="/projects" method="post">
+              {% if error %}
+                <div class="alert alert-danger">
+                  <span>{{ error }}</span>
+                </div>
+              {% endif %}
+              <label for="projectName">Project name</label>
+              <div class="landing-input-row">
+                <input id="projectName" name="name" placeholder="Python Scripts" required autofocus>
+                <button class="btn landing-main-cta" type="submit">Create</button>
+              </div>
+            </form>
+          {% else %}
+            <a class="btn landing-main-cta" href="/login">Get started</a>
+          {% endif %}
+        </div>
       </div>
 
       <div class="landing-visual" aria-hidden="true">
         <div class="image-orb">
           <img src="{{ url_for('static', path='/images/hero-girl-bg.png') }}" alt="">
         </div>
-        <span class="float-dot dot-one"></span>
-        <span class="float-dot dot-two"></span>
-        <span class="float-dot dot-three"></span>
+        <svg class="float-spark spark-one" viewBox="0 0 24 24"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
+        <svg class="float-spark spark-two" viewBox="0 0 24 24"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
+        <svg class="float-spark spark-three" viewBox="0 0 24 24"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z"/></svg>
       </div>
+    </div>
+
+    <div class="landing-card-foot">
+      <div class="landing-note">
+        <div class="landing-note-row">
+          <svg width="34" height="22" viewBox="0 0 34 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+            <rect x="1" y="5" width="20" height="16" rx="2"></rect>
+            <path d="M8 5V3a2 2 0 0 1 2-2h21a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-10"></path>
+          </svg>
+          <p>Create project spaces and keep code<br>notes saved with instant auto-save</p>
+        </div>
+        <small>&copy; Copy Paste 2026. All rights reserved.</small>
+      </div>
+      <nav class="landing-social" aria-label="Quick links">
+        <a href="#projects" aria-label="Projects">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </a>
+        <a href="/login" aria-label="Admin">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 10V7a6 6 0 0 1 12 0v3h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm3 0h6V7a3 3 0 0 0-6 0z"/></svg>
+        </a>
+        <a href="/" aria-label="Home">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 11h3v10h6v-6h4v6h6V11h3z"/></svg>
+        </a>
+        <a href="#top" aria-label="Back to top">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </a>
+      </nav>
     </div>
   </div>
 </section>
