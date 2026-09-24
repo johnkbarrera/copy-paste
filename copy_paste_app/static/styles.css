@@ -1553,16 +1553,19 @@ body:has(.landing-hero) .content-section {
     width: 100%;
   }
 
+  /* Image sits under the copy; --art-h is its rendered height (size% / 1.777) */
   .landing-hero {
+    --art-size: 140%;
+    --art-h: 78.8vw;
     background:
-      linear-gradient(180deg, var(--landing-coral-deep) 0%, var(--landing-coral) 42%, rgba(242, 107, 91, 0) 64%),
-      url('/static/images/hero-girl-bg.png?v=3') 72% 100% / 170% auto no-repeat,
-      linear-gradient(180deg, var(--landing-coral), var(--landing-peach));
+      linear-gradient(180deg, var(--landing-coral-deep) 0%, var(--landing-coral) calc(100% - var(--art-h)), rgba(242, 107, 91, 0) calc(100% - var(--art-h) + 12vw)),
+      url('/static/images/hero-girl-bg.png?v=3') 72% 100% / var(--art-size) auto no-repeat,
+      var(--landing-coral);
   }
 
   .landing-stage {
     align-items: flex-start;
-    padding-bottom: 82vw;
+    padding-bottom: calc(var(--art-h) - 8vw);
   }
 
   .doodles-right {
@@ -1616,11 +1619,8 @@ body:has(.landing-hero) .content-section {
   }
 
   .landing-hero {
-    background-size: auto, 250% auto, auto;
-  }
-
-  .landing-stage {
-    padding-bottom: 120vw;
+    --art-size: 250%;
+    --art-h: 140.7vw;
   }
 
   .doodles-left {
