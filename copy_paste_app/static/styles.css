@@ -1254,7 +1254,7 @@ body:has(.hero-editorial) .app-footer {
    Landing Page: Full-bleed Hero (palette sampled from hero-girl-bg.png)
    ========================================================================== */
 
-body:has(.landing-hero) {
+body:has(.landing-nav) {
   --landing-coral: #f26b5b;
   --landing-coral-deep: #e2503f;
   --landing-peach: #f8b4a3;
@@ -1264,15 +1264,15 @@ body:has(.landing-hero) {
   background-color: var(--landing-cream);
 }
 
-[data-theme="dark"] body:has(.landing-hero) {
+[data-theme="dark"] body:has(.landing-nav) {
   background-color: var(--bg-body);
 }
 
-body:has(.landing-hero) .topbar {
+body:has(.landing-nav) .topbar {
   display: none;
 }
 
-body:has(.landing-hero) main {
+body:has(.landing-nav) main {
   max-width: none;
   padding: 0;
 }
@@ -1290,7 +1290,7 @@ body:has(.landing-hero) main {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: min(100svh, 820px);
+  min-height: min(calc(100svh - 72px), 760px);
   overflow: hidden;
   color: #ffffff;
   background:
@@ -1299,10 +1299,11 @@ body:has(.landing-hero) main {
     var(--landing-peach);
 }
 
-/* Top bar */
+/* Top bar (sits above the hero, so the artwork starts below it) */
 .landing-nav {
-  position: relative;
-  z-index: 3;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: clamp(16px, 3vw, 40px);
@@ -1457,32 +1458,6 @@ body:has(.landing-hero) main {
   transform: translateY(-2px);
 }
 
-.landing-create-form {
-  max-width: 420px;
-}
-
-.landing-create-form label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.landing-input-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-}
-
-.landing-input-row input {
-  border: 0;
-  border-radius: var(--radius-xs);
-  background: #ffffff;
-  color: var(--landing-ink);
-}
-
 /* Line doodles */
 .landing-doodles {
   position: absolute;
@@ -1504,16 +1479,66 @@ body:has(.landing-hero) main {
 
 .doodles-right {
   right: 12px;
-  top: 92px;
+  top: 24px;
   width: clamp(90px, 10vw, 140px);
   stroke: var(--landing-coral-deep);
   opacity: 0.4;
 }
 
 /* Projects below the hero */
-body:has(.landing-hero) .content-section {
+body:has(.landing-nav) .content-section {
   width: min(1260px, calc(100% - 2 * clamp(16px, 4vw, 56px)));
   margin: clamp(32px, 5vw, 64px) auto;
+}
+
+/* Signed in: no hero, projects first with a discreet create panel on the side */
+.is-workspace .workspace-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+  gap: 28px;
+}
+
+.create-panel {
+  order: 2;
+  position: sticky;
+  top: 96px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.create-panel form {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.create-panel label {
+  color: var(--coral);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.create-panel .alert {
+  margin: 0;
+}
+
+.create-panel input {
+  padding: 10px 14px;
+  border-radius: var(--radius-xs);
+  font-size: 0.9rem;
+}
+
+.create-panel .landing-cta {
+  gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  box-shadow: none;
 }
 
 /* ==========================================================================
@@ -1571,6 +1596,15 @@ body:has(.landing-hero) .content-section {
   .doodles-right {
     display: none;
   }
+
+  .is-workspace .workspace-body {
+    grid-template-columns: 1fr;
+  }
+
+  .create-panel {
+    order: 0;
+    position: static;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1614,9 +1648,6 @@ body:has(.landing-hero) .content-section {
     margin-left: auto;
   }
 
-  .landing-input-row {
-    grid-template-columns: 1fr;
-  }
 
   .landing-hero {
     --art-size: 250%;
