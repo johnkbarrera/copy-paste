@@ -1,126 +1,80 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="hero-editorial">
-  <div class="hero-banner-title">
-    <h1 class="hero-heading">
-      Own the <span class="emp">Code</span> &bull; Keep the <span class="emp-outline">Notes</span>
-    </h1>
-    <div class="hero-tagline-jp">Minimalist Canvas &bull; ミニマル</div>
+  <div class="landing-kicker">
+    <span>Landing Page</span>
+    <strong>Copy Paste</strong>
   </div>
-
   <div class="hero-showcase">
-    <!-- Anime Background Visual Side -->
-    <div class="hero-art-side">
-      <div class="hero-art-overlay"></div>
-      
-      <div class="hero-art-content">
-        <div class="hero-pill-badge">
-          <span>⚡ Tokyo Streetwear Aesthetic</span>
-        </div>
-        <h2>Where Art Meets Your Code.</h2>
-        <p>A fast, minimalist Japanese workspace to organize topical cheat sheets, live code notes, and snippet libraries with zero friction.</p>
-      </div>
-
-      <div class="hero-feature-tags">
-        <div class="feature-tag">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          <span>Instant Auto-Save</span>
-        </div>
-        <div class="feature-tag">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          <span>1-Click Clipboard</span>
-        </div>
-        <div class="feature-tag">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-          <span>Clean Code Canvas</span>
-        </div>
+    <div class="landing-card-nav">
+      <a class="mini-brand" href="/">
+        <span class="mini-brand-mark">CP</span>
+        <strong>Copy<br>Paste</strong>
+      </a>
+      <nav class="landing-links" aria-label="Landing navigation">
+        <a href="/">Home</a>
+        <a href="#projects">Projects</a>
+        <a href="/login">Admin</a>
+      </nav>
+      <div class="landing-contact">
+        <span>Local app</span>
+        <strong>Port 8085</strong>
       </div>
     </div>
 
-    <!-- Right Side: Fast Action Form -->
-    <div class="hero-panel-side">
-      {% if user %}
-        <form action="/projects" method="post">
-          <div class="panel-header-mini">
-            <div class="kanji-sub">「 新規プロジェクト 」 NEW WORKSPACE</div>
-            <h2>Create Project</h2>
-            <p>Initialize a new workspace with a clean, shareable URL slug.</p>
-          </div>
-
-          {% if error %}
-            <div class="alert alert-danger">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <span>{{ error }}</span>
-            </div>
-          {% endif %}
-
-          <div class="form-group">
-            <label for="projectName">Project Name</label>
-            <div class="input-wrap has-icon">
-              <span class="input-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-              </span>
-              <input id="projectName" name="name" placeholder="e.g. Tokio API, Dev Setup, Python Scripts" required autofocus>
-            </div>
-          </div>
-
-          <button class="btn btn-primary" type="submit" style="width: 100%;">
-            <span>Create Project</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
-        </form>
-      {% else %}
-        <div>
-          <div class="panel-header-mini">
-            <div class="kanji-sub">「 管理者アクセス 」 ADMIN ACCESS</div>
-            <h2>Admin Workspace</h2>
-            <p>Sign in to initialize projects, manage topical sheets, and edit code snippets.</p>
-          </div>
-          <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.925rem; line-height: 1.6;">
-            Default administrative credentials are configured for rapid local workflows and instant onboarding.
-          </p>
-          <a class="btn btn-primary" href="/login" style="width: 100%;">
-            <span>Sign in as Admin</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
+    <div class="landing-hero-grid">
+      <div class="landing-copy">
+        <div class="split-word">
+          <span>I want</span>
+          <span>to organize</span>
         </div>
-      {% endif %}
+        <h1>Get notes now</h1>
+        <p>
+          Create project spaces, open focused topics, and keep code notes saved in MongoDB with a clean writing canvas.
+        </p>
+
+        {% if db_error %}
+          <div class="alert alert-danger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ db_error }}</span>
+          </div>
+        {% endif %}
+
+        {% if user %}
+          <form class="landing-create-form" action="/projects" method="post">
+            {% if error %}
+              <div class="alert alert-danger">
+                <span>{{ error }}</span>
+              </div>
+            {% endif %}
+            <label for="projectName">Project name</label>
+            <div class="landing-input-row">
+              <input id="projectName" name="name" placeholder="Python Scripts" required autofocus>
+              <button class="btn btn-sumi" type="submit">Create</button>
+            </div>
+          </form>
+        {% else %}
+          <a class="btn btn-sumi landing-main-cta" href="/login">Get started</a>
+        {% endif %}
+      </div>
+
+      <div class="landing-visual" aria-hidden="true">
+        <div class="image-orb">
+          <img src="{{ url_for('static', path='/images/hero-girl-bg.png') }}" alt="">
+        </div>
+        <span class="float-dot dot-one"></span>
+        <span class="float-dot dot-two"></span>
+        <span class="float-dot dot-three"></span>
+      </div>
     </div>
   </div>
-
-  {% if db_error %}
-    <div class="alert alert-danger" style="margin-top: 24px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-      <span>{{ db_error }}</span>
-    </div>
-  {% endif %}
 </section>
 
-<section class="content-section">
+<section class="content-section" id="projects">
   <div class="section-head">
     <div class="section-title-wrap">
       <span class="section-title-jp">「 プロジェクト一覧 」 WORKSPACES</span>
