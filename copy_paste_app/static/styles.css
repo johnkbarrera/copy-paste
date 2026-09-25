@@ -1391,6 +1391,254 @@ body:has(.side-trail) main {
   margin: 0 0 0 auto;
 }
 
+/* Blobs: folder dropzone card */
+#blobs {
+  margin-top: clamp(40px, 5vw, 64px);
+}
+
+.blob-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 155px;
+  padding: 20px;
+  border: 2px dashed var(--border-medium);
+  border-radius: var(--radius-lg);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.blob-drop [hidden] {
+  display: none !important;
+}
+
+.blob-drop:hover,
+.blob-drop:focus-visible,
+.blob-drop.is-over {
+  border-color: var(--coral);
+  background: var(--coral-soft);
+  outline: none;
+}
+
+.blob-drop.is-over {
+  transform: scale(1.01);
+}
+
+.blob-drop.is-ready {
+  cursor: default;
+  border-style: solid;
+  background: var(--bg-surface);
+}
+
+.blob-drop-idle {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.blob-drop-idle svg {
+  color: var(--coral);
+}
+
+.blob-drop-idle span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.blob-drop-ready {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+
+.blob-drop-ready label {
+  color: var(--coral);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.blob-drop-ready input {
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 0.9rem;
+}
+
+.blob-drop-summary {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.blob-drop-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface-hover);
+}
+
+.blob-drop-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--coral-gradient);
+  transition: width 0.2s;
+}
+
+.blob-drop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.blob-icon {
+  background: var(--pine-soft);
+  color: var(--pine-green);
+}
+
+.blob-empty {
+  color: var(--text-muted);
+}
+
+/* Blob page: file tree + viewer */
+.blob-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.file-tree {
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  padding: 14px 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.85rem;
+}
+
+.file-tree-list {
+  margin: 0;
+  padding: 0 0 0 12px;
+  list-style: none;
+}
+
+.file-tree > .file-tree-list {
+  padding-left: 0;
+}
+
+.tree-dir summary,
+.tree-file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tree-dir summary {
+  color: var(--text-primary);
+  font-weight: 700;
+  list-style: none;
+}
+
+.tree-dir summary::-webkit-details-marker {
+  display: none;
+}
+
+.tree-dir summary svg {
+  color: var(--pine-green);
+  flex: none;
+}
+
+.tree-file {
+  color: var(--text-secondary);
+}
+
+.tree-file svg {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.tree-file span,
+.tree-dir summary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-file.is-binary {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.tree-dir summary:hover,
+.tree-file:hover {
+  background: var(--bg-surface-hover);
+}
+
+.tree-file.is-active {
+  background: var(--coral-soft);
+  color: var(--coral);
+  font-weight: 700;
+}
+
+.tree-file.is-active svg {
+  color: var(--coral);
+}
+
+.blob-viewer .toolbar-left {
+  min-width: 0;
+}
+
+.blob-file-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.blob-viewer .toolbar-right .btn {
+  padding: 4px 12px;
+}
+
+.blob-binary {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 60px 24px;
+  color: #a3a3b2;
+  text-align: center;
+}
+
+.blob-binary p {
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .blob-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .file-tree {
+    position: static;
+    max-height: 40vh;
+  }
+}
+
 .toast-icon {
   flex-shrink: 0;
   color: var(--coral);

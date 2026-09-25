@@ -128,7 +128,7 @@ server {
     listen 80;
     server_name copy-paste.kankunapaq.com;
 
-    client_max_body_size 20M;
+    client_max_body_size 60M;  # blob uploads: up to 50 MB of files + multipart overhead
 
     location / {
         proxy_pass         http://127.0.0.1:8085;
@@ -220,7 +220,7 @@ server {
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
 
-    client_max_body_size 20M;
+    client_max_body_size 60M;  # blob uploads: up to 50 MB of files + multipart overhead
 
     location / {
         proxy_pass         http://127.0.0.1:8085;

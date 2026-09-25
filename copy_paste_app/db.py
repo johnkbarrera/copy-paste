@@ -12,6 +12,8 @@ from .security import hash_password
 PROJECTS_COLLECTION = "copy_paste_projects"
 TOPICS_COLLECTION = "copy_paste_topics"
 USERS_COLLECTION = "copy_paste_users"
+BLOBS_COLLECTION = "copy_paste_blobs"
+BLOB_FILES_COLLECTION = "copy_paste_blob_files"
 
 
 def utc_now() -> datetime:
@@ -27,6 +29,10 @@ def ensure_database(db: Database) -> None:
     db[USERS_COLLECTION].create_index([("username", ASCENDING)], unique=True)
     db[PROJECTS_COLLECTION].create_index([("slug", ASCENDING)], unique=True)
     db[TOPICS_COLLECTION].create_index([("project_slug", ASCENDING), ("topic_slug", ASCENDING)], unique=True)
+    db[BLOBS_COLLECTION].create_index([("project_slug", ASCENDING), ("blob_slug", ASCENDING)], unique=True)
+    db[BLOB_FILES_COLLECTION].create_index(
+        [("project_slug", ASCENDING), ("blob_slug", ASCENDING), ("path", ASCENDING)], unique=True
+    )
 
     now = utc_now()
     db[USERS_COLLECTION].update_one(

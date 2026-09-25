@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% macro render_tree(nodes, depth=0) %}
+  <ul class="file-tree-list">
+    {% for node in nodes %}
+      <li>
+        {% if node.dir %}
+          <details class="tree-dir"{% if expand_all or depth == 0 or (selected and selected.path.startswith(node.path ~ '/')) %} open{% endif %}>
+            <summary>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              <span>{{ node.name }}</span>
+            </summary>
+            {{ render_tree(node.children, depth + 1) }}
+          </details>
+        {% else %}
+          <a class="tree-file{% if selected and selected.path == node.path %} is-active{% endif %}{% if not node.is_text %} is-binary{% endif %}"
+             href="?file={{ node.path | urlencode }}" title="{{ node.path }} · {{ node.size | human_size }}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span>{{ node.name }}</span>
+          </a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% block content %}
+<nav class="side-trail" aria-label="Breadcrumb">
+  <a class="trail-home" href="/" title="All projects" aria-label="All projects">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+  </a>
+  <span class="trail-sep" aria-hidden="true"></span>
+  <a class="trail-item" href="/{{ project.slug }}" title="{{ project.name }}">{{ project.name }}</a>
+  <span class="trail-sep" aria-hidden="true"></span>
+  <span class="trail-item is-current" aria-current="page" title="{{ blob.name }}">{{ blob.name }}</span>
+</nav>
+
+<section class="editor-shell">
+  <div class="editor-head">
+    <div class="editor-meta">
+      <div style="font-size: 0.8rem; font-weight: 800; color: var(--coral); letter-spacing: 0.1em; margin-bottom: 4px;">
+        「 フォルダ 」 FOLDER BLOB
+      </div>
+      <h1>{{ blob.name }}</h1>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span class="slug-pill">{{ blob.file_count }} file{{ "" if blob.file_count == 1 else "s" }} &middot; {{ blob.total_size | human_size }}</span>
+        {% if blob.skipped_count %}
+          <span class="status-tag" title="Ignored folders (.git, node_modules…) or files over 5 MB">{{ blob.skipped_count }} skipped</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="editor-actions-top">
+      {% if project.disabled %}
+        <span class="status-tag">Read-only &middot; project disabled</span>
+      {% else %}
+        <form action="/{{ project.slug }}/blob/{{ blob.blob_slug }}/delete" method="post" data-title="{{ blob.name }}" onsubmit="return confirm('Delete blob &quot;' + this.dataset.title + '&quot; and all its files? This cannot be undone.');">
+          <button type="submit" class="btn btn-ghost btn-sm btn-danger-ghost" title="Delete this blob">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+            <span>Delete</span>
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="blob-layout">
+    <nav class="file-tree" aria-label="Files">
+      {{ render_tree(tree) }}
+    </nav>
+
+    <div class="editor-container blob-viewer">
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--coral); flex: none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span class="blob-file-path">{{ selected.path if selected else "No file selected" }}</span>
+        </div>
+        {% if selected %}
+          <div class="toolbar-right">
+            <span class="stats-counter">{{ selected.size | human_size }}</span>
+            {% if content is not none %}
+              <button type="button" class="btn btn-ghost btn-sm" id="copyFileBtn" title="Copy file contents">Copy</button>
+            {% endif %}
+            <a class="btn btn-ghost btn-sm" href="/{{ project.slug }}/blob/{{ blob.blob_slug }}/raw?file={{ selected.path | urlencode }}" title="Download file">Download</a>
+          </div>
+        {% endif %}
+      </div>
+
+      {% if content is not none %}
+        <div class="editor-body">
+          <pre class="line-gutter" id="lineGutter" aria-hidden="true">1</pre>
+          <textarea id="blobContent" class="editor-textarea" wrap="off" spellcheck="false" readonly>{{ content }}</textarea>
+        </div>
+      {% else %}
+        <div class="blob-binary">
+          {% if storage_error %}
+            <p>{{ storage_error }}</p>
+          {% elif selected %}
+            <p>This file isn't text, so it can't be previewed.</p>
+            <a class="btn btn-primary btn-sm" href="/{{ project.slug }}/blob/{{ blob.blob_slug }}/raw?file={{ selected.path | urlencode }}">Download {{ selected.path.rsplit('/', 1)[-1] }}</a>
+          {% else %}
+            <p>This blob has no files.</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script src="{{ url_for('static', path='/blobs.js') }}?v=1"></script>
+{% endblock %}

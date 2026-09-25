@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import logging
+import mimetypes
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,16 +13,40 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from bson import ObjectId
+from botocore.exceptions import BotoCoreError, ClientError
 from pymongo.errors import PyMongoError
+from starlette.concurrency import run_in_threadpool
 from pymongo.database import Database
 
 from .config import Settings, get_settings
-from .db import PROJECTS_COLLECTION, TOPICS_COLLECTION, USERS_COLLECTION, ensure_database, get_database, utc_now
+from . import storage
+from .blobs import (
+    BLOB_MAX_FILE_BYTES,
+    BLOB_MAX_FILES,
+    BLOB_MAX_TOTAL_BYTES,
+    build_tree,
+    decode_text,
+    default_file,
+    human_size,
+    normalize_blob_path,
+)
+from .db import (
+    BLOB_FILES_COLLECTION,
+    BLOBS_COLLECTION,
+    PROJECTS_COLLECTION,
+    TOPICS_COLLECTION,
+    USERS_COLLECTION,
+    ensure_database,
+    get_database,
+    utc_now,
+)
 from .security import read_signed_payload, sign_payload, verify_password
 
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = BASE_DIR.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+templates.env.filters["human_size"] = human_size
 logger = logging.getLogger("copy_paste")
 
 app = FastAPI(
@@ -40,7 +65,11 @@ FLASH_MESSAGES = {
     "project_disabled": ("success", "Project disabled"),
     "project_enabled": ("success", "Project enabled"),
     "project_is_disabled": ("error", "This project is disabled, enable it to make changes"),
+    "blob_created": ("success", "Blob uploaded"),
+    "blob_deleted": ("success", "Blob deleted"),
+    "blob_delete_failed": ("error", "Could not delete the blob from object storage"),
 }
+STORAGE_ERRORS = (storage.StorageNotConfigured, BotoCoreError, ClientError)
 
 
 def slugify(value: str) -> str:
@@ -246,7 +275,8 @@ def project_view(
 ) -> HTMLResponse:
     project = get_project_or_404(db, project_slug)
     topics = list(db[TOPICS_COLLECTION].find({"project_slug": project_slug}).sort("updated_at", -1))
-    return render(request, "project.html", {"project": project, "topics": topics})
+    blobs = list(db[BLOBS_COLLECTION].find({"project_slug": project_slug}).sort("created_at", -1))
+    return render(request, "project.html", {"project": project, "topics": topics, "blobs": blobs})
 
 
 def set_project_disabled(db: Database, project_slug: str, disabled: bool) -> RedirectResponse:
@@ -406,3 +436,193 @@ def delete_topic(
         {"$pull": {"topics": {"slug": topic_slug}}, "$set": {"updated_at": utc_now()}},
     )
     return redirect_with_flash(f"/{project_slug}", "topic_deleted")
+
+
+# --- Blobs: folder uploads; contents in object storage, metadata in MongoDB ---
+
+
+def blob_error(detail: str, status_code: int) -> JSONResponse:
+    return JSONResponse({"ok": False, "detail": detail}, status_code=status_code)
+
+
+def get_blob_or_404(db: Database, project_slug: str, blob_slug: str) -> dict:
+    blob = db[BLOBS_COLLECTION].find_one({"project_slug": project_slug, "blob_slug": blob_slug})
+    if not blob:
+        raise HTTPException(status_code=404, detail="Blob not found")
+    return blob
+
+
+@app.post("/{project_slug}/blobs")
+async def create_blob(
+    request: Request,
+    project_slug: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+) -> JSONResponse:
+    project = await run_in_threadpool(get_project_or_404, db, project_slug)
+    if project.get("disabled"):
+        return blob_error("This project is disabled, enable it to make changes", 423)
+
+    form = await request.form(max_files=BLOB_MAX_FILES, max_fields=BLOB_MAX_FILES + 10)
+    name = clean_name(str(form.get("name", "")))
+    uploads = form.getlist("files")
+    paths = [str(path) for path in form.getlist("paths")]
+    if not is_valid_name(name) or not slugify(name):
+        return blob_error(INVALID_NAME_MESSAGE, 400)
+    if len(uploads) != len(paths):
+        return blob_error("Malformed upload", 400)
+
+    files: list[tuple[str, bytes, str]] = []
+    metadata: list[dict] = []
+    seen: set[str] = set()
+    total = 0
+    skipped = 0
+    for upload, raw_path in zip(uploads, paths):
+        path = normalize_blob_path(raw_path)
+        if not path or path in seen or isinstance(upload, str):
+            skipped += 1
+            continue
+        data = await upload.read(BLOB_MAX_FILE_BYTES + 1)
+        if len(data) > BLOB_MAX_FILE_BYTES:
+            skipped += 1
+            continue
+        total += len(data)
+        if total > BLOB_MAX_TOTAL_BYTES:
+            return blob_error(f"Folder is larger than {human_size(BLOB_MAX_TOTAL_BYTES)}", 413)
+        is_text = decode_text(data) is not None
+        content_type = "text/plain; charset=utf-8" if is_text else (mimetypes.guess_type(path)[0] or "application/octet-stream")
+        seen.add(path)
+        files.append((path, data, content_type))
+        metadata.append({"path": path, "size": len(data), "is_text": is_text})
+    if not files:
+        return blob_error("No files to upload (empty folder, or everything was ignored or too large)", 400)
+
+    def save() -> str:
+        now = utc_now()
+        blob_id = ObjectId()
+        blob_slug = next_available_slug(db, BLOBS_COLLECTION, "blob_slug", slugify(name), {"project_slug": project_slug})
+        # Upload contents first so metadata never points at missing objects
+        storage.put_files(str(blob_id), files)
+        try:
+            db[BLOBS_COLLECTION].insert_one(
+                {
+                    "_id": blob_id,
+                    "project_slug": project_slug,
+                    "blob_slug": blob_slug,
+                    "name": name,
+                    "file_count": len(metadata),
+                    "total_size": total,
+                    "skipped_count": skipped,
+                    "created_at": now,
+                    "updated_at": now,
+                }
+            )
+            db[BLOB_FILES_COLLECTION].insert_many(
+                [{**item, "blob_id": blob_id, "project_slug": project_slug, "blob_slug": blob_slug} for item in metadata]
+            )
+        except PyMongoError:
+            db[BLOBS_COLLECTION].delete_one({"_id": blob_id})
+            db[BLOB_FILES_COLLECTION].delete_many({"blob_id": blob_id})
+            storage.delete_blob(str(blob_id))
+            raise
+        db[PROJECTS_COLLECTION].update_one({"slug": project_slug}, {"$set": {"updated_at": now}})
+        return blob_slug
+
+    try:
+        blob_slug = await run_in_threadpool(save)
+    except storage.StorageNotConfigured as exc:
+        logger.warning("Blob upload without storage: %s", exc)
+        return blob_error("Object storage is not configured on the server", 503)
+    except (BotoCoreError, ClientError) as exc:
+        logger.warning("Could not upload blob to object storage: %s", exc)
+        return blob_error("Could not upload files to object storage", 502)
+    except PyMongoError as exc:
+        logger.warning("Could not save blob metadata: %s", exc)
+        return blob_error("Database error, please try again", 503)
+
+    url = f"/{project_slug}/blob/{blob_slug}"
+    response = JSONResponse({"ok": True, "url": url, "files": len(metadata), "skipped": skipped})
+    response.set_cookie(FLASH_COOKIE, "blob_created", max_age=60, httponly=True, samesite="lax")
+    return response
+
+
+@app.get("/{project_slug}/blob/{blob_slug}", response_class=HTMLResponse)
+def blob_view(
+    request: Request,
+    project_slug: str,
+    blob_slug: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+    file: str | None = None,
+) -> HTMLResponse:
+    project = get_project_or_404(db, project_slug)
+    blob = get_blob_or_404(db, project_slug, blob_slug)
+    files = list(
+        db[BLOB_FILES_COLLECTION]
+        .find({"blob_id": blob["_id"]}, {"_id": 0, "path": 1, "size": 1, "is_text": 1})
+        .sort("path", 1)
+    )
+    selected_path = file if any(item["path"] == file for item in files) else default_file(files)
+    selected = next((item for item in files if item["path"] == selected_path), None)
+    content = None
+    storage_error = None
+    if selected and selected["is_text"]:
+        try:
+            content = decode_text(storage.read_file(str(blob["_id"]), selected["path"]))
+        except STORAGE_ERRORS as exc:
+            logger.warning("Could not read blob file: %s", exc)
+            storage_error = "Could not load this file from object storage."
+    return render(
+        request,
+        "blob.html",
+        {
+            "project": project,
+            "blob": blob,
+            "tree": build_tree(files),
+            "selected": selected,
+            "content": content,
+            "storage_error": storage_error,
+            "expand_all": len(files) <= 80,
+        },
+    )
+
+
+@app.get("/{project_slug}/blob/{blob_slug}/raw")
+def blob_download(
+    project_slug: str,
+    blob_slug: str,
+    file: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+) -> RedirectResponse:
+    blob = get_blob_or_404(db, project_slug, blob_slug)
+    if not db[BLOB_FILES_COLLECTION].find_one({"blob_id": blob["_id"], "path": file}, {"_id": 1}):
+        raise HTTPException(status_code=404, detail="File not found")
+    filename = re.sub(r'["\\\r\n]', "_", file.rsplit("/", 1)[-1])
+    try:
+        url = storage.download_url(str(blob["_id"]), file, filename)
+    except STORAGE_ERRORS as exc:
+        logger.warning("Could not sign blob download: %s", exc)
+        raise HTTPException(status_code=502, detail="Object storage unavailable") from exc
+    return RedirectResponse(url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+
+@app.post("/{project_slug}/blob/{blob_slug}/delete")
+def delete_blob(
+    project_slug: str,
+    blob_slug: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+) -> RedirectResponse:
+    project = get_project_or_404(db, project_slug)
+    if project.get("disabled"):
+        return redirect_with_flash(f"/{project_slug}", "project_is_disabled")
+    blob = get_blob_or_404(db, project_slug, blob_slug)
+    try:
+        storage.delete_blob(str(blob["_id"]))
+    except STORAGE_ERRORS as exc:
+        logger.warning("Could not delete blob objects: %s", exc)
+        return redirect_with_flash(f"/{project_slug}/blob/{blob_slug}", "blob_delete_failed")
+    db[BLOB_FILES_COLLECTION].delete_many({"blob_id": blob["_id"]})
+    db[BLOBS_COLLECTION].delete_one({"_id": blob["_id"]})
+    return redirect_with_flash(f"/{project_slug}", "blob_deleted")

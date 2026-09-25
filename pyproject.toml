@@ -25,6 +25,7 @@ dependencies = [
     "python-multipart>=0.0.20",
     "python-dotenv>=1.1.1",
     "pymongo>=4.15.0",
+    "boto3>=1.43.102",
 ]
 
 
@@ -32,3 +33,10 @@ dependencies = [
 
 [tool.ruff]
 line-length = 120
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mongomock>=4.3.0",
+    "moto>=5.2.3",
+]
