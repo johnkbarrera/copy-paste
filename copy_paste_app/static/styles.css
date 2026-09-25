@@ -1609,6 +1609,38 @@ body:has(.side-trail) main {
   flex: none;
 }
 
+.tree-dir summary span {
+  flex: 1;
+}
+
+.tree-dir-download {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.tree-dir summary:hover .tree-dir-download,
+.tree-dir-download:focus-visible {
+  opacity: 1;
+}
+
+.tree-dir-download:hover {
+  background: var(--coral-soft);
+  color: var(--coral);
+}
+
+@media (hover: none) {
+  .tree-dir-download {
+    opacity: 1;
+  }
+}
+
 .tree-file {
   color: var(--text-secondary);
 }

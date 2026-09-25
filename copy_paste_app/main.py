@@ -3,13 +3,15 @@ from __future__ import annotations
 import re
 import logging
 import mimetypes
+import tempfile
 import unicodedata
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -605,6 +607,57 @@ def blob_download(
         logger.warning("Could not sign blob download: %s", exc)
         raise HTTPException(status_code=502, detail="Object storage unavailable") from exc
     return RedirectResponse(url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+
+@app.get("/{project_slug}/blob/{blob_slug}/zip")
+def blob_zip(
+    project_slug: str,
+    blob_slug: str,
+    db: Annotated[Database, Depends(database)],
+    _: Annotated[dict, Depends(require_user)],
+    dir: str | None = None,
+) -> StreamingResponse:
+    """Download the whole blob, or one of its folders (?dir=a/b), as a .zip keeping the tree."""
+    blob = get_blob_or_404(db, project_slug, blob_slug)
+    paths = [item["path"] for item in db[BLOB_FILES_COLLECTION].find({"blob_id": blob["_id"]}, {"path": 1}).sort("path", 1)]
+    prefix = ""
+    root_name = blob["name"]
+    if dir:
+        folder = normalize_blob_path(dir)
+        if not folder:
+            raise HTTPException(status_code=404, detail="Folder not found")
+        prefix = folder + "/"
+        paths = [path for path in paths if path.startswith(prefix)]
+        root_name = folder.rsplit("/", 1)[-1]
+    if not paths:
+        raise HTTPException(status_code=404, detail="Folder not found")
+
+    # Blobs are capped at 50 MB; spill to disk past 16 MB instead of holding it all in memory
+    archive = tempfile.SpooledTemporaryFile(max_size=16 * 1024 * 1024)
+    try:
+        with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+            for path, data in storage.read_files(str(blob["_id"]), paths):
+                zip_file.writestr(f"{root_name}/{path[len(prefix):]}", data)
+    except STORAGE_ERRORS as exc:
+        archive.close()
+        logger.warning("Could not build blob zip: %s", exc)
+        raise HTTPException(status_code=502, detail="Object storage unavailable") from exc
+    size = archive.tell()
+    archive.seek(0)
+
+    def chunks():
+        try:
+            while chunk := archive.read(1024 * 1024):
+                yield chunk
+        finally:
+            archive.close()
+
+    filename = (slugify(root_name) or "blob") + ".zip"
+    return StreamingResponse(
+        chunks(),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"', "Content-Length": str(size)},
+    )
 
 
 @app.post("/{project_slug}/blob/{blob_slug}/delete")

@@ -59,6 +59,12 @@ def read_file(blob_id: str, path: str) -> bytes:
     return response["Body"].read()
 
 
+def read_files(blob_id: str, paths: list[str]):
+    """Yield (path, data) in the given order, fetching several objects in parallel."""
+    with ThreadPoolExecutor(max_workers=UPLOAD_WORKERS) as pool:
+        yield from zip(paths, pool.map(lambda path: read_file(blob_id, path), paths))
+
+
 def download_url(blob_id: str, path: str, filename: str, expires: int = 300) -> str:
     """Short-lived signed URL that downloads the file as an attachment."""
     return get_client().generate_presigned_url(

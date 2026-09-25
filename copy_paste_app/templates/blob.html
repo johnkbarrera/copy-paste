@@ -9,6 +9,7 @@
             <summary>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
               <span>{{ node.name }}</span>
+              <a class="tree-dir-download" href="/{{ project.slug }}/blob/{{ blob.blob_slug }}/zip?dir={{ node.path | urlencode }}" title="Download {{ node.name }}/ as .zip" aria-label="Download folder {{ node.name }} as zip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></a>
             </summary>
             {{ render_tree(node.children, depth + 1) }}
           </details>
@@ -51,6 +52,10 @@
     </div>
 
     <div class="editor-actions-top">
+      <a class="btn btn-primary btn-sm" href="/{{ project.slug }}/blob/{{ blob.blob_slug }}/zip" title="Download the whole folder, keeping its structure">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Download .zip</span>
+      </a>
       {% if project.disabled %}
         <span class="status-tag">Read-only &middot; project disabled</span>
       {% else %}
