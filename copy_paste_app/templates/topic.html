@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+<nav class="side-trail" aria-label="Breadcrumb">
+  <a class="trail-home" href="/" title="All projects" aria-label="All projects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></a>
+  <span class="trail-sep" aria-hidden="true"></span>
+  <a class="trail-item" href="/{{ project.slug }}" title="{{ project.name }}">{{ project.name }}</a>
+  <span class="trail-sep" aria-hidden="true"></span>
+  <span class="trail-item is-current" aria-current="page" title="{{ topic.title }}">{{ topic.title }}</span>
+</nav>
+
 <section class="editor-shell">
   <div class="editor-head">
     <div class="editor-meta">
-      <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/">Projects</a>
-        <span>/</span>
-        <a href="/{{ project.slug }}">{{ project.name }}</a>
-        <span>/</span>
-        <span>{{ topic.title }}</span>
-      </nav>
       <div style="font-size: 0.8rem; font-weight: 800; color: var(--coral); letter-spacing: 0.1em; margin-bottom: 4px;">
         「 エディター 」 CODE CANVAS
       </div>
@@ -71,7 +72,10 @@
     </div>
 
     <!-- Textarea -->
-    <textarea id="content" name="content" class="editor-textarea" spellcheck="false" placeholder="Start typing code snippets, documentation, or notes here..."{% if project.disabled %} readonly{% else %} autofocus{% endif %}>{{ topic.content }}</textarea>
+    <div class="editor-body">
+      <pre class="line-gutter" id="lineGutter" aria-hidden="true">1</pre>
+      <textarea id="content" name="content" class="editor-textarea" wrap="off" spellcheck="false" placeholder="Start typing code snippets, documentation, or notes here..."{% if project.disabled %} readonly{% else %} autofocus{% endif %}>{{ topic.content }}</textarea>
+    </div>
 
     <!-- Editor Footer Toolbar -->
     <div class="editor-footer">
@@ -92,5 +96,5 @@
   </form>
 </section>
 
-<script src="{{ url_for('static', path='/editor.js') }}?v=3"></script>
+<script src="{{ url_for('static', path='/editor.js') }}?v=4"></script>
 {% endblock %}

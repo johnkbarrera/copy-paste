@@ -940,24 +940,75 @@ body:has(.hero-editorial) .feature-tag {
   margin-bottom: 48px;
 }
 
-.breadcrumbs {
+/* Breadcrumb rail: fixed on the left, vertical text so it stays narrow */
+.side-trail {
+  position: fixed;
+  z-index: 90;
+  left: clamp(10px, 1.6vw, 24px);
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  gap: 10px;
+  padding: 12px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.breadcrumbs a {
+.trail-home {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--coral);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.trail-home:hover {
+  background: var(--coral);
+  color: #ffffff;
+}
+
+.trail-item {
+  writing-mode: vertical-rl;
+  max-height: 26vh;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 4px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--coral);
 }
 
-.breadcrumbs a:hover {
-  text-decoration: underline;
+a.trail-item:hover {
+  background: var(--coral-soft);
+}
+
+.trail-item.is-current {
+  color: var(--text-secondary);
+}
+
+.trail-sep {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--border-medium);
+  flex-shrink: 0;
+}
+
+/* Leave room so the rail never covers content */
+body:has(.side-trail) main {
+  padding-left: max(clamp(24px, 4vw, 56px), 72px);
 }
 
 .workspace-title {
@@ -1096,10 +1147,40 @@ body:has(.hero-editorial) .feature-tag {
   color: #94a3b8;
 }
 
+/* Line numbers: a gutter over the textarea's left padding, scrolled in sync (see editor.js) */
+.editor-body {
+  --gutter-w: calc(2ch + 28px);
+  position: relative;
+}
+
+.line-gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--gutter-w);
+  margin: 0;
+  padding: 26px 12px 60px 16px;
+  overflow: hidden;
+  border-right: 1px solid var(--editor-border);
+  background: var(--editor-footer-bg);
+  color: #6b6b7b;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  text-align: right;
+  user-select: none;
+  pointer-events: none;
+}
+
 .editor-textarea {
+  display: block;
   width: 100%;
   min-height: 65vh;
-  padding: 26px;
+  padding: 26px 26px 26px calc(var(--gutter-w, 0px) + 18px);
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow: auto;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -1778,6 +1859,30 @@ body:not(:has(.landing-hero))::before {
   .topbar {
     padding: 0 16px;
   }
+
+  /* Rail becomes a horizontal strip pinned under the top bar */
+  .side-trail {
+    position: sticky;
+    top: 72px;
+    left: auto;
+    transform: none;
+    flex-direction: row;
+    width: max-content;
+    max-width: 100%;
+    margin-bottom: 18px;
+    padding: 6px 12px 6px 6px;
+  }
+
+  .trail-item {
+    writing-mode: horizontal-tb;
+    max-height: none;
+    max-width: 38vw;
+  }
+
+  body:has(.side-trail) main {
+    padding-left: 16px;
+  }
+
 
   main {
     padding: 20px 16px;

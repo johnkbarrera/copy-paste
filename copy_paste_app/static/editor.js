@@ -10,6 +10,8 @@
   const content = document.querySelector("#content");
   const statsLabel = document.querySelector("#editorStats");
   const copyAllBtn = document.querySelector("#copyAllBtn");
+  const gutter = document.querySelector("#lineGutter");
+  let gutterLines = 0;
 
   let saveTimer = null;
   let isSaving = false;
@@ -27,12 +29,25 @@
     }
   }
 
+  function updateGutter() {
+    if (!gutter || !content) return;
+    const lines = content.value.split("\n").length;
+    if (lines !== gutterLines) {
+      gutterLines = lines;
+      gutter.textContent = Array.from({ length: lines }, (_, i) => i + 1).join("\n");
+      const digits = Math.max(2, String(lines).length);
+      gutter.parentElement.style.setProperty("--gutter-w", `calc(${digits}ch + 28px)`);
+    }
+    gutter.scrollTop = content.scrollTop;
+  }
+
   function updateMetrics() {
     if (!content || !statsLabel) return;
     const text = content.value;
     const lines = text.length === 0 ? 0 : text.split("\n").length;
     const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
     const chars = text.length;
+    updateGutter();
 
     statsLabel.innerHTML = `<strong>${lines}</strong> line${lines === 1 ? "" : "s"} &bull; <strong>${words}</strong> word${words === 1 ? "" : "s"} &bull; <strong>${chars.toLocaleString()}</strong> char${chars === 1 ? "" : "s"}`;
   }
@@ -108,6 +123,10 @@
 
   // Auto-save on typing + metrics
   if (content) {
+    content.addEventListener("scroll", () => {
+      if (gutter) gutter.scrollTop = content.scrollTop;
+    });
+
     content.addEventListener("input", () => {
       setStatus("unsaved", "Unsaved changes");
       updateMetrics();
