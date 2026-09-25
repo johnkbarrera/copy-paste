@@ -48,6 +48,7 @@
   </form>
   {% else %}
   <div class="panel-card create-tabs-card">
+  {% if use_blobs %}
   <div class="create-tabs" role="tablist" aria-label="Create">
     <button type="button" role="tab" id="tab-topic" aria-controls="pane-topic" aria-selected="true">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
@@ -58,8 +59,9 @@
       Blob
     </button>
   </div>
+  {% endif %}
 
-  <form id="pane-topic" role="tabpanel" aria-labelledby="tab-topic" action="/{{ project.slug }}/topics" method="post">
+  <form id="pane-topic"{% if use_blobs %} role="tabpanel" aria-labelledby="tab-topic"{% endif %} action="/{{ project.slug }}/topics" method="post">
     <div class="panel-header-mini">
       <div class="kanji-sub">「 新規トピック 」 NEW NOTE SHEET</div>
       <h2>Create Topic</h2>
@@ -102,6 +104,7 @@
     </button>
   </form>
 
+  {% if use_blobs %}
   <div id="pane-blob" role="tabpanel" aria-labelledby="tab-blob" hidden>
     <div class="panel-header-mini">
       <div class="kanji-sub">「 新規フォルダ 」 NEW FOLDER BLOB</div>
@@ -127,6 +130,7 @@
       </form>
     </div>
   </div>
+  {% endif %}
   </div>
   {% endif %}
 </section>
@@ -200,6 +204,7 @@
   </div>
 </section>
 
+{% if use_blobs %}
 <section class="content-section" id="blobs">
   <div class="section-head">
     <div class="section-title-wrap">
@@ -243,7 +248,9 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
+{% if use_blobs %}
 <script>
   // Create panel tabs: Topic / Blob
   (function() {
@@ -285,6 +292,7 @@
     if (saved && !topicError && document.getElementById(saved)) select(document.getElementById(saved));
   })();
 </script>
+{% endif %}
 
 <script>
   // Real-time topic filter
@@ -315,5 +323,7 @@
     }
   })();
 </script>
+{% if use_blobs %}
 <script src="{{ url_for('static', path='/blobs.js') }}?v=1"></script>
+{% endif %}
 {% endblock %}

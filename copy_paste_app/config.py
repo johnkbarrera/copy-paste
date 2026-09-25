@@ -8,6 +8,8 @@ class Settings:
     mongo_uri: str = getenv("MONGO_URI", "mongodb://localhost:27017")
     mongo_database: str = getenv("MONGO_DATABASE", "copy_paste")
     secret_key: str = getenv("SECRET_KEY", "copy-paste-local-secret-change-me")
+    # Folder blobs (upload / browse / download); needs the object storage below
+    use_blobs: bool = getenv("USE_BLOBS", "false").strip().lower() == "true"
     # S3-compatible object storage (Cloudflare R2 / AWS S3) for blob files
     object_storage_bucket: str = getenv("OBJECT_STORAGE_BUCKET", "")
     object_storage_endpoint: str = getenv("OBJECT_STORAGE_ENDPOINT", "")

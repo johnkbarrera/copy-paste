@@ -49,6 +49,7 @@ BASE_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = BASE_DIR.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 templates.env.filters["human_size"] = human_size
+templates.env.globals["use_blobs"] = get_settings().use_blobs
 logger = logging.getLogger("copy_paste")
 
 app = FastAPI(
@@ -277,7 +278,9 @@ def project_view(
 ) -> HTMLResponse:
     project = get_project_or_404(db, project_slug)
     topics = list(db[TOPICS_COLLECTION].find({"project_slug": project_slug}).sort("updated_at", -1))
-    blobs = list(db[BLOBS_COLLECTION].find({"project_slug": project_slug}).sort("created_at", -1))
+    blobs = []
+    if get_settings().use_blobs:
+        blobs = list(db[BLOBS_COLLECTION].find({"project_slug": project_slug}).sort("created_at", -1))
     return render(request, "project.html", {"project": project, "topics": topics, "blobs": blobs})
 
 
@@ -443,6 +446,12 @@ def delete_topic(
 # --- Blobs: folder uploads; contents in object storage, metadata in MongoDB ---
 
 
+def require_blobs_enabled() -> None:
+    """USE_BLOBS=false hides blobs entirely: every blob route answers 404."""
+    if not get_settings().use_blobs:
+        raise HTTPException(status_code=404, detail="Not found")
+
+
 def blob_error(detail: str, status_code: int) -> JSONResponse:
     return JSONResponse({"ok": False, "detail": detail}, status_code=status_code)
 
@@ -454,7 +463,7 @@ def get_blob_or_404(db: Database, project_slug: str, blob_slug: str) -> dict:
     return blob
 
 
-@app.post("/{project_slug}/blobs")
+@app.post("/{project_slug}/blobs", dependencies=[Depends(require_blobs_enabled)])
 async def create_blob(
     request: Request,
     project_slug: str,
@@ -548,7 +557,7 @@ async def create_blob(
     return response
 
 
-@app.get("/{project_slug}/blob/{blob_slug}", response_class=HTMLResponse)
+@app.get("/{project_slug}/blob/{blob_slug}", response_class=HTMLResponse, dependencies=[Depends(require_blobs_enabled)])
 def blob_view(
     request: Request,
     project_slug: str,
@@ -589,7 +598,7 @@ def blob_view(
     )
 
 
-@app.get("/{project_slug}/blob/{blob_slug}/raw")
+@app.get("/{project_slug}/blob/{blob_slug}/raw", dependencies=[Depends(require_blobs_enabled)])
 def blob_download(
     project_slug: str,
     blob_slug: str,
@@ -609,7 +618,7 @@ def blob_download(
     return RedirectResponse(url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 
-@app.get("/{project_slug}/blob/{blob_slug}/zip")
+@app.get("/{project_slug}/blob/{blob_slug}/zip", dependencies=[Depends(require_blobs_enabled)])
 def blob_zip(
     project_slug: str,
     blob_slug: str,
@@ -660,7 +669,7 @@ def blob_zip(
     )
 
 
-@app.post("/{project_slug}/blob/{blob_slug}/delete")
+@app.post("/{project_slug}/blob/{blob_slug}/delete", dependencies=[Depends(require_blobs_enabled)])
 def delete_blob(
     project_slug: str,
     blob_slug: str,
