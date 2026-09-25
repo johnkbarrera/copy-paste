@@ -1391,6 +1391,52 @@ body:has(.side-trail) main {
   margin: 0 0 0 auto;
 }
 
+/* Create panel: Topic / Blob tabs */
+.create-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 22px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface-elevated);
+}
+
+.create-tabs [role="tab"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.create-tabs [role="tab"]:hover {
+  color: var(--text-primary);
+}
+
+.create-tabs [role="tab"][aria-selected="true"] {
+  background: var(--bg-surface);
+  color: var(--coral);
+  box-shadow: var(--shadow-sm);
+}
+
+.create-tabs-card [role="tabpanel"] {
+  margin: 0;
+}
+
+.create-tabs-card .blob-drop {
+  min-height: 170px;
+}
+
 /* Blobs: folder dropzone card */
 #blobs {
   margin-top: clamp(40px, 5vw, 64px);

@@ -47,7 +47,19 @@
     </button>
   </form>
   {% else %}
-  <form class="panel-card" action="/{{ project.slug }}/topics" method="post">
+  <div class="panel-card create-tabs-card">
+  <div class="create-tabs" role="tablist" aria-label="Create">
+    <button type="button" role="tab" id="tab-topic" aria-controls="pane-topic" aria-selected="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+      Topic
+    </button>
+    <button type="button" role="tab" id="tab-blob" aria-controls="pane-blob" aria-selected="false" tabindex="-1">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      Blob
+    </button>
+  </div>
+
+  <form id="pane-topic" role="tabpanel" aria-labelledby="tab-topic" action="/{{ project.slug }}/topics" method="post">
     <div class="panel-header-mini">
       <div class="kanji-sub">「 新規トピック 」 NEW NOTE SHEET</div>
       <h2>Create Topic</h2>
@@ -89,6 +101,33 @@
       </svg>
     </button>
   </form>
+
+  <div id="pane-blob" role="tabpanel" aria-labelledby="tab-blob" hidden>
+    <div class="panel-header-mini">
+      <div class="kanji-sub">「 新規フォルダ 」 NEW FOLDER BLOB</div>
+      <h2>Create Blob</h2>
+      <p>Upload a folder of code to browse and copy its files.</p>
+    </div>
+    <div class="blob-drop" id="blobDrop" data-upload-url="/{{ project.slug }}/blobs" tabindex="0" role="button" aria-label="Drop a folder or choose one to upload as a blob">
+      <input type="file" id="blobPicker" webkitdirectory multiple hidden>
+      <div class="blob-drop-idle">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><polyline points="9 13 12 10 15 13"></polyline><line x1="12" y1="10" x2="12" y2="17"></line></svg>
+        <strong>Drop a folder here</strong>
+        <span>or click to choose one &middot; up to 50&nbsp;MB, 5&nbsp;MB per file</span>
+      </div>
+      <form class="blob-drop-ready" hidden>
+        <label for="blobName">Blob name</label>
+        <input id="blobName" name="name" required maxlength="80">
+        <p class="blob-drop-summary" id="blobSummary"></p>
+        <div class="blob-drop-progress" hidden><span></span></div>
+        <div class="blob-drop-actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-blob-cancel>Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  </div>
   {% endif %}
 </section>
 
@@ -173,26 +212,6 @@
   </div>
 
   <div class="grid" id="blobGrid">
-    {% if not project.disabled %}
-      <div class="blob-drop" id="blobDrop" data-upload-url="/{{ project.slug }}/blobs" tabindex="0" role="button" aria-label="Drop a folder or choose one to upload as a blob">
-        <input type="file" id="blobPicker" webkitdirectory multiple hidden>
-        <div class="blob-drop-idle">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><polyline points="9 13 12 10 15 13"></polyline><line x1="12" y1="10" x2="12" y2="17"></line></svg>
-          <strong>Drop a folder here</strong>
-          <span>or click to choose one &middot; up to 50&nbsp;MB, 5&nbsp;MB per file</span>
-        </div>
-        <form class="blob-drop-ready" hidden>
-          <label for="blobName">Blob name</label>
-          <input id="blobName" name="name" required maxlength="80">
-          <p class="blob-drop-summary" id="blobSummary"></p>
-          <div class="blob-drop-progress" hidden><span></span></div>
-          <div class="blob-drop-actions">
-            <button type="button" class="btn btn-ghost btn-sm" data-blob-cancel>Cancel</button>
-            <button type="submit" class="btn btn-primary btn-sm">Upload</button>
-          </div>
-        </form>
-      </div>
-    {% endif %}
 
     {% for blob in blobs %}
       <div class="card-shell">
@@ -218,12 +237,54 @@
         {% endif %}
       </div>
     {% else %}
-      {% if project.disabled %}
-        <p class="blob-empty">No blobs in this project.</p>
-      {% endif %}
+      <p class="blob-empty">
+        No blobs yet.{% if not project.disabled %} Use the <a href="#top" data-open-blob-tab>Blob tab</a> to upload a folder.{% endif %}
+      </p>
     {% endfor %}
   </div>
 </section>
+
+<script>
+  // Create panel tabs: Topic / Blob
+  (function() {
+    const tabs = Array.from(document.querySelectorAll('.create-tabs [role="tab"]'));
+    if (!tabs.length) return;
+
+    function select(tab, focus) {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', on);
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      });
+      if (focus) tab.focus();
+      try { localStorage.setItem('cp_create_tab', tab.id); } catch (e) {}
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        select(next, true);
+      });
+    });
+
+    document.querySelectorAll('[data-open-blob-tab]').forEach((link) =>
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        select(document.getElementById('tab-blob'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      })
+    );
+
+    let saved = null;
+    try { saved = localStorage.getItem('cp_create_tab'); } catch (e) {}
+    // A topic validation error must stay visible on the Topic tab
+    const topicError = document.querySelector('#pane-topic .alert');
+    if (saved && !topicError && document.getElementById(saved)) select(document.getElementById(saved));
+  })();
+</script>
 
 <script>
   // Real-time topic filter
