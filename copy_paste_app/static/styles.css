@@ -1860,6 +1860,22 @@ body:not(:has(.landing-hero))::before {
     padding: 0 16px;
   }
 
+  /* Keyboard shortcuts don't apply on phones; leave room for Save */
+  .shortcut-hint {
+    display: none;
+  }
+
+  .editor-footer {
+    justify-content: flex-end;
+  }
+
+  /* Keep the top bar within 390px: icons only */
+  .brand-kanji,
+  .user-name,
+  .nav-actions form .btn span {
+    display: none;
+  }
+
   /* Rail becomes a horizontal strip pinned under the top bar */
   .side-trail {
     position: sticky;
